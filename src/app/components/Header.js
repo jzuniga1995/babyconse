@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useUser } from "@auth0/nextjs-auth0";
 
 export default function Header() {
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isLoading } = useUser();
 
   return (
     <header className="bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 text-white shadow-md relative z-50">
@@ -101,23 +101,25 @@ export default function Header() {
         </nav>
 
         {/* Botón de registro/inicio de sesión */}
-        {isAuthenticated ? (
+        {isLoading ? (
+          <p className="text-white">Cargando...</p>
+        ) : user ? (
           <div className="hidden sm:flex items-center gap-4">
-            <p className="text-white">Hola, {user?.name || "Usuario"}</p>
-            <button
-              onClick={() => logout({ returnTo: window.location.origin })}
+            <p className="text-white">Hola, {user.name || user.email}</p>
+            <a
+              href="/api/auth/logout"
               className="bg-white text-teal-600 font-semibold px-5 py-2 rounded-full hover:bg-teal-100 transition-all"
             >
               Cerrar sesión
-            </button>
+            </a>
           </div>
         ) : (
-          <button
-            onClick={() => loginWithRedirect()}
+          <a
+            href="/api/auth/login"
             className="hidden sm:inline-block bg-white text-teal-600 font-semibold px-5 py-2 rounded-full hover:bg-teal-100 transition-all"
           >
-            Regístrate
-          </button>
+            Iniciar sesión
+          </a>
         )}
       </div>
 
