@@ -1,36 +1,12 @@
+import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
+import { RxCross1 } from "react-icons/rx";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white">
       <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-          {/* Columna 1: Navegación */}
-          <div>
-            <h3 className="text-lg font-bold mb-4">Navegación</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#about" className="text-sm hover:underline">
-                  Sobre Nosotros
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="text-sm hover:underline">
-                  Contacto
-                </a>
-              </li>
-              <li>
-                <a href="#privacy" className="text-sm hover:underline">
-                  Política de Privacidad
-                </a>
-              </li>
-              <li>
-                <a href="#terms" className="text-sm hover:underline">
-                  Términos y Condiciones
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Columna 2: Redes Sociales */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+          {/* Columna 1: Redes Sociales */}
           <div>
             <h3 className="text-lg font-bold mb-4">Síguenos</h3>
             <div className="flex justify-center md:justify-start space-x-4">
@@ -38,7 +14,7 @@ export default function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white"
+                className="text-blue-500 hover:text-blue-600 transition-all"
                 aria-label="Facebook"
               >
                 <svg
@@ -51,11 +27,11 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white"
-                aria-label="Twitter"
+                className="text-gray-400 hover:text-gray-500 transition-all"
+                aria-label="X (Twitter)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -66,12 +42,11 @@ export default function Footer() {
                   <path d="M23 3a10.9 10.9 0 01-3.14 1.53A4.48 4.48 0 0016.87 2c-2.66 0-4.41 2.22-3.74 4.7A12.94 12.94 0 013 4.09s-4 9 5 13a13 13 0 01-7 2c9 5.5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
                 </svg>
               </a>
-              {/* Instagram */}
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white"
+                className="text-pink-500 hover:text-pink-600 transition-all"
                 aria-label="Instagram"
               >
                 <svg
@@ -83,12 +58,11 @@ export default function Footer() {
                   <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2zm0 1.5A4 4 0 0 0 3.5 7.5v9a4 4 0 0 0 4 4h9a4 4 0 0 0 4-4v-9a4 4 0 0 0-4-4h-9zM12 6.75a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zM17.125 6a.875.875 0 1 1 0 1.75.875.875 0 0 1 0-1.75z" />
                 </svg>
               </a>
-              {/* TikTok */}
               <a
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white"
+                className="text-black hover:text-gray-700 transition-all"
                 aria-label="TikTok"
               >
                 <svg
@@ -103,19 +77,45 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Columna 2: Navegación */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Navegación</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="#about" className="text-sm hover:underline text-gray-300 hover:text-white transition-all">
+                  Sobre Nosotros
+                </a>
+              </li>
+              <li>
+                <a href="/contacto" className="text-sm hover:underline text-gray-300 hover:text-white transition-all">
+                  Contacto
+                </a>
+              </li>
+              <li>
+                <a href="#privacy" className="text-sm hover:underline text-gray-300 hover:text-white transition-all">
+                  Política de Privacidad
+                </a>
+              </li>
+              <li>
+                <a href="#terms" className="text-sm hover:underline text-gray-300 hover:text-white transition-all">
+                  Términos y Condiciones
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Columna 3: Información */}
           <div>
             <h3 className="text-lg font-bold mb-4">Información</h3>
             <p className="text-sm text-gray-400">
-              © 2025 Guía para Padres Primerizos.
+              © 2025 Salud y Ser. Todos los derechos reservados.
             </p>
-            <p className="text-sm text-gray-400">Todos los derechos reservados.</p>
           </div>
         </div>
 
         <div className="mt-8 border-t border-gray-700 pt-6 text-center">
           <p className="text-sm text-gray-400">
-            Desarrollado con ❤️ por Guía para Padres Primerizos.
+            Desarrollado con ❤️ por Salud y Ser.
           </p>
         </div>
       </div>
