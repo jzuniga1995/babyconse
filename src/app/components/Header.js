@@ -2,24 +2,32 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useUser } from "@auth0/nextjs-auth0";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isLoading } = useUser();
+  const { data: session, status } = useSession();
+
+  const isLoading = status === "loading";
+  const user = session?.user;
 
   return (
-    <header className="bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 text-white shadow-md relative z-50">
+    <header className="bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white shadow-md relative z-50">
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
         {/* Logo */}
-        <Link href="/" className="text-3xl font-bold tracking-wide">
-          Guía para Padres
-        </Link>
+        <div className="flex flex-col">
+          <Link href="/" className="text-3xl font-bold tracking-wide">
+            Salud y Ser
+          </Link>
+          <p className="text-sm text-green-200">
+            Tu guía para el bienestar físico y mental
+          </p>
+        </div>
 
         {/* Botón Menú móvil */}
         <button
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="block sm:hidden text-white focus:outline-none"
+          onClick={() => setIsOpen(!isOpen)}
+          className="block sm:hidden text-white focus:outline-none z-50"
           aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
         >
           <svg
@@ -35,8 +43,8 @@ export default function Header() {
               strokeWidth={2}
               d={
                 isOpen
-                  ? "M6 18L18 6M6 6l12 12" // Icono de "Cerrar"
-                  : "M4 6h16M4 12h16M4 18h16" // Icono de "Menú"
+                  ? "M6 18L18 6M6 6l12 12" // Icono de "Cerrar" (X)
+                  : "M4 6h16M4 12h16M4 18h16" // Icono de "Menú" (hamburguesa)
               }
             />
           </svg>
@@ -44,83 +52,61 @@ export default function Header() {
 
         {/* Navegación */}
         <nav
-          className={`${
-            isOpen ? "block" : "hidden"
-          } absolute top-0 left-0 w-full bg-teal-600 sm:bg-transparent sm:static sm:w-auto sm:flex sm:items-center sm:gap-8 sm:block z-40`}
+          className={`absolute top-0 left-0 w-full bg-green-600 sm:bg-transparent sm:static sm:w-auto sm:flex sm:items-center sm:gap-8 z-40 transition-all duration-300 ease-in-out ${
+            isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          } sm:opacity-100 sm:visible`}
         >
-          {/* Botón para cerrar en el menú móvil */}
-          <button
-            onClick={() => setIsOpen(false)}
-            className="block sm:hidden text-white text-right py-4 px-6 focus:outline-none"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 ml-auto"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          {/* Enlaces */}
           <Link
             href="/"
-            className="block px-4 py-2 text-lg sm:text-white hover:text-teal-200 sm:hover:text-teal-200"
+            className="block px-4 py-2 text-lg hover:text-green-200 sm:px-6"
             onClick={() => setIsOpen(false)}
           >
             Inicio
           </Link>
           <Link
-            href="/consejos"
-            className="block px-4 py-2 text-lg sm:text-white hover:text-teal-200 sm:hover:text-teal-200"
+            href="/articulos"
+            className="block px-4 py-2 text-lg hover:text-green-200 sm:px-6"
             onClick={() => setIsOpen(false)}
           >
-            Consejos
+            Artículos
           </Link>
           <Link
-            href="/comunidad"
-            className="block px-4 py-2 text-lg sm:text-white hover:text-teal-200 sm:hover:text-teal-200"
+            href="/foro"
+            className="block px-4 py-2 text-lg hover:text-green-200 sm:px-6"
             onClick={() => setIsOpen(false)}
           >
-            Comunidad
+            Foro
           </Link>
           <Link
             href="/contacto"
-            className="block px-4 py-2 text-lg sm:text-white hover:text-teal-200 sm:hover:text-teal-200"
+            className="block px-4 py-2 text-lg hover:text-green-200 sm:px-6"
             onClick={() => setIsOpen(false)}
           >
             Contacto
           </Link>
-        </nav>
-
-        {/* Botón de registro/inicio de sesión */}
-        {isLoading ? (
-          <p className="text-white">Cargando...</p>
-        ) : user ? (
-          <div className="hidden sm:flex items-center gap-4">
-            <p className="text-white">Hola, {user.name || user.email}</p>
-            <a
-              href="/api/auth/logout"
-              className="bg-white text-teal-600 font-semibold px-5 py-2 rounded-full hover:bg-teal-100 transition-all"
+          {isLoading ? (
+            <p className="text-white px-4 py-2">Cargando...</p>
+          ) : user ? (
+            <div className="flex flex-col sm:flex-row items-center gap-4 px-4 sm:px-6">
+              <span className="text-sm sm:text-lg text-green-200">
+                Hola, {user.name}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="bg-white text-green-600 font-semibold px-4 py-2 rounded-full hover:bg-green-100 transition-all"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => signIn("google")}
+              className="mt-4 block sm:mt-0 sm:inline-block bg-white text-green-600 font-semibold px-4 py-2 rounded-full hover:bg-green-100 transition-all"
             >
-              Cerrar sesión
-            </a>
-          </div>
-        ) : (
-          <a
-            href="/api/auth/login"
-            className="hidden sm:inline-block bg-white text-teal-600 font-semibold px-5 py-2 rounded-full hover:bg-teal-100 transition-all"
-          >
-            Iniciar sesión
-          </a>
-        )}
+              Iniciar sesión
+            </button>
+          )}
+        </nav>
       </div>
 
       {/* Fondo oscuro para cerrar el menú móvil */}
