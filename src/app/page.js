@@ -1,6 +1,7 @@
 import React from "react";
 import Hero from "./components/Hero";
 import Link from "next/link";
+import { generateSlug } from "./utils/slugify";
 
 // Función para generar metadata dinámica para la página principal
 export const metadata = {
@@ -41,12 +42,7 @@ async function fetchArticles() {
     // Generar slugs únicos para los artículos
     return data.data.map((article) => ({
       ...article,
-      slug: `${article.title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[áéíóúñ]/g, (c) =>
-          ({ á: "a", é: "e", í: "i", ó: "o", ú: "u", ñ: "n" }[c])
-        )}`,
+      slug: generateSlug(article.title),
     }));
   } catch (error) {
     console.error("Error al cargar artículos:", error);
@@ -92,13 +88,16 @@ export default async function Home() {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-6">
-                  <h4 className="text-2xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
-                    {article.title}
-                  </h4>
+                  <Link href={`/articulos/${article.slug}`}>
+                    <h4 className="text-2xl font-semibold text-gray-800 group-hover:text-blue-500 transition cursor-pointer">
+                      {article.title}
+                    </h4>
+                  </Link>
                   <p className="text-gray-600 mt-3">{article.description}</p>
                   <Link
                     href={`/articulos/${article.slug}`}
                     className="mt-4 inline-block text-blue-600 font-medium hover:underline"
+                    aria-label={`Leer más sobre ${article.title}`}
                   >
                     Leer más →
                   </Link>
