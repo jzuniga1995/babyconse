@@ -4,6 +4,7 @@ import Button from "./Button";
 export default function Hero() {
   return (
     <section className="bg-gradient-to-br from-green-400 via-green-500 to-teal-600 text-white py-20 sm:py-32 relative mt-[64px]">
+      {/* Fondo decorativo */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -27,6 +28,28 @@ export default function Hero() {
           Descubre artículos, consejos y herramientas para mejorar tu bienestar
           físico, mental y emocional.
         </p>
+
+        {/* Beneficios destacados */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white bg-opacity-20 p-4 rounded-lg shadow-lg">
+            <h3 className="text-lg font-bold text-yellow-300">💪 Salud física</h3>
+            <p className="text-sm mt-2 text-gray-200">
+              Encuentra rutinas de ejercicio y consejos para mantenerte activo.
+            </p>
+          </div>
+          <div className="bg-white bg-opacity-20 p-4 rounded-lg shadow-lg">
+            <h3 className="text-lg font-bold text-yellow-300">🧠 Bienestar mental</h3>
+            <p className="text-sm mt-2 text-gray-200">
+              Aprende a manejar el estrés y mejorar tu claridad mental.
+            </p>
+          </div>
+          <div className="bg-white bg-opacity-20 p-4 rounded-lg shadow-lg">
+            <h3 className="text-lg font-bold text-yellow-300">🥗 Nutrición</h3>
+            <p className="text-sm mt-2 text-gray-200">
+              Explora recetas saludables y aprende a comer mejor.
+            </p>
+          </div>
+        </div>
 
         {/* Botones */}
         <div className="mt-6 flex flex-col sm:flex-row gap-6 lg:gap-8 justify-center">
@@ -61,39 +84,21 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Decoración: íconos */}
-      <div className="absolute top-16 left-6 sm:left-10 animate-bounce hover:scale-105 hover:opacity-75 transition-transform duration-300 z-10">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="w-10 sm:w-14 lg:w-16 opacity-70 text-white"
-        >
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          <path d="M3 11h3l2-2 4 4 3-3 2 2h3" />
-        </svg>
+      {/* Sección decorativa de estadísticas */}
+      <div className="mt-12 container mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+        <div>
+          <h3 className="text-2xl font-extrabold text-yellow-300">+100</h3>
+          <p className="text-sm text-gray-100">Artículos publicados</p>
+        </div>
+        <div>
+          <h3 className="text-2xl font-extrabold text-yellow-300">+10k</h3>
+          <p className="text-sm text-gray-100">Usuarios satisfechos</p>
+        </div>
+        <div>
+          <h3 className="text-2xl font-extrabold text-yellow-300">+5</h3>
+          <p className="text-sm text-gray-100">Áreas de enfoque</p>
+        </div>
       </div>
-      <div className="absolute bottom-8 right-4 sm:bottom-12 sm:right-10 animate-bounce hover:scale-105 hover:opacity-75 transition-transform duration-300 z-10">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-8 sm:w-12 lg:w-16 opacity-70 text-white"
-  >
-    <circle cx="12" cy="5" r="2" />
-    <path d="M12 22v-5M9 12l3 3 3-3" />
-    <path d="M6 12a6 6 0 0 1 12 0" />
-  </svg>
-</div>
-
     </section>
   );
 }

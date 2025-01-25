@@ -18,7 +18,7 @@ export default function Header() {
         {/* Logo */}
         <div className="flex flex-col">
           <Link href="/" className="text-3xl font-bold tracking-wide">
-            Salud y Ser
+            SaludySer
           </Link>
           <p className="text-sm text-green-200 mt-1">
             Tu guía para el bienestar físico y mental

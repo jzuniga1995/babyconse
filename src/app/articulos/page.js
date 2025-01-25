@@ -37,7 +37,7 @@ export default async function ArticulosPage() {
 
   // Pasar los artículos al componente cliente
   return (
-    <section className="bg-gray-50 min-h-screen">
+    <section className="bg-gray-50 min-h-screen mt-16">
       <h1 className="text-5xl font-extrabold text-center text-gray-800 py-8">
         Artículos por Categoría
       </h1>

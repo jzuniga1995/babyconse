@@ -94,7 +94,8 @@ export default async function ArticuloDetallesPage(context) {
   }
 
   return (
-    <section className="bg-gray-50 min-h-screen py-10">
+    <section className="bg-gray-50 min-h-screen py-10 mt-16">
+
       <div className="max-w-4xl mx-auto px-4">
         <Link
           href="/articulos"
