@@ -1,4 +1,5 @@
 import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -45,36 +46,36 @@ export default function Footer() {
               <h3 className="text-xl font-semibold mb-4 text-white">Navegación</h3>
               <ul className="space-y-3">
                 <li>
-                  <a
-                    href="#about"
+                  <Link
+                    href="/nosotros"
                     className="text-sm hover:text-white transition-all"
                   >
                     Sobre Nosotros
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/contacto"
                     className="text-sm hover:text-white transition-all"
                   >
                     Contacto
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#privacy"
+                  <Link
+                    href="/politica"
                     className="text-sm hover:text-white transition-all"
                   >
                     Política de Privacidad
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#terms"
+                  <Link
+                    href="/terminos"
                     className="text-sm hover:text-white transition-all"
                   >
                     Términos y Condiciones
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -94,7 +95,8 @@ export default function Footer() {
           {/* Mensaje Inspirador */}
           <div className="mt-10 text-center">
             <p className="text-lg text-gray-300 italic">
-              "Cuidar de tu cuerpo y mente es el primer paso para vivir plenamente. ¡Cree en ti y sigue adelante!"
+              "Cuidar de tu cuerpo y mente es el primer paso para vivir
+              plenamente. ¡Cree en ti y sigue adelante!"
             </p>
           </div>
 

@@ -3,6 +3,7 @@
 import "./globals.css";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import CookieConsent from "./components/CookieConsent";
 import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({ children }) {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
           <Header />
           <main className="min-h-[calc(100vh-64px)]">{children}</main>
           <Footer />
+          <CookieConsent />
         </SessionProvider>
       </body>
     </html>
