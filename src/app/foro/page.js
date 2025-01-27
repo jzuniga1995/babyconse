@@ -173,15 +173,23 @@ export default function Foro() {
 
   if (!user)
     return (
-      <div className="text-center mt-8">
-        <p className="text-lg">Debes iniciar sesión para participar en el foro.</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-8 text-center max-w-md">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Inicia sesión para participar
+        </h2>
+        <p className="text-gray-600 mt-2">
+          Debes iniciar sesión para acceder al foro y unirte a la conversación.
+        </p>
         <button
           onClick={() => signIn("google")}
-          className="mt-4 px-6 py-2 bg-blue-500 text-white font-medium rounded hover:bg-blue-600 transition"
+          className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-transform transform hover:scale-105"
         >
-          Iniciar Sesión
+          Iniciar Sesión con Google
         </button>
       </div>
+    </div>
+    
     );
 
   return (

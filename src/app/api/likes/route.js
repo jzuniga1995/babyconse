@@ -4,6 +4,7 @@ import { getConnection } from "../../lib/db";
 
 // Manejo de solicitudes POST (dar o quitar like)
 export async function POST(req) {
+  let connection; // Declarar la conexión fuera del bloque try
   try {
     // Verificar sesión
     const session = await getServerSession(authOptions);
@@ -15,20 +16,20 @@ export async function POST(req) {
     }
 
     // Obtener datos de la solicitud
-    const { id, isComment } = await req.json(); // `id` puede ser el postId o commentId
-    if (!id) {
+    const { id, isComment } = await req.json();
+    if (!id || typeof id !== "number") {
       return new Response(
-        JSON.stringify({ error: "El ID es requerido" }),
+        JSON.stringify({ error: "El ID es requerido y debe ser un número válido" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const connection = await getConnection();
+    connection = await getConnection(); // Obtener conexión del pool
 
     if (isComment) {
       // Manejo de likes para comentarios
       const [existingLike] = await connection.execute(
-        "SELECT * FROM likes WHERE comment_id = ? AND user_email = ?",
+        "SELECT 1 FROM likes WHERE comment_id = ? AND user_email = ?",
         [id, session.user.email]
       );
 
@@ -38,8 +39,6 @@ export async function POST(req) {
           "DELETE FROM likes WHERE comment_id = ? AND user_email = ?",
           [id, session.user.email]
         );
-
-        // Actualizar el conteo de likes en la tabla `comments`, asegurando que no sea menor que 0
         await connection.execute(
           "UPDATE comments SET likes = GREATEST(likes - 1, 0) WHERE id = ?",
           [id]
@@ -50,8 +49,6 @@ export async function POST(req) {
           "INSERT INTO likes (comment_id, user_email) VALUES (?, ?)",
           [id, session.user.email]
         );
-
-        // Incrementar el conteo de likes en la tabla `comments`
         await connection.execute(
           "UPDATE comments SET likes = likes + 1 WHERE id = ?",
           [id]
@@ -64,8 +61,6 @@ export async function POST(req) {
         [id]
       );
 
-      connection.end();
-
       return new Response(JSON.stringify(updatedComment[0]), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -73,7 +68,7 @@ export async function POST(req) {
     } else {
       // Manejo de likes para posts
       const [existingLike] = await connection.execute(
-        "SELECT * FROM likes WHERE post_id = ? AND user_email = ?",
+        "SELECT 1 FROM likes WHERE post_id = ? AND user_email = ?",
         [id, session.user.email]
       );
 
@@ -83,8 +78,6 @@ export async function POST(req) {
           "DELETE FROM likes WHERE post_id = ? AND user_email = ?",
           [id, session.user.email]
         );
-
-        // Actualizar el conteo de likes en la tabla `posts`, asegurando que no sea menor que 0
         await connection.execute(
           "UPDATE posts SET likes = GREATEST(likes - 1, 0) WHERE id = ?",
           [id]
@@ -95,8 +88,6 @@ export async function POST(req) {
           "INSERT INTO likes (post_id, user_email) VALUES (?, ?)",
           [id, session.user.email]
         );
-
-        // Incrementar el conteo de likes en la tabla `posts`
         await connection.execute(
           "UPDATE posts SET likes = likes + 1 WHERE id = ?",
           [id]
@@ -109,8 +100,6 @@ export async function POST(req) {
         [id]
       );
 
-      connection.end();
-
       return new Response(JSON.stringify(updatedPost[0]), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -122,5 +111,13 @@ export async function POST(req) {
       JSON.stringify({ error: "Error al manejar los likes" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    if (connection) {
+      try {
+        connection.release(); // Liberar conexión en cualquier caso
+      } catch (releaseError) {
+        console.error("Error al liberar la conexión:", releaseError);
+      }
+    }
   }
 }

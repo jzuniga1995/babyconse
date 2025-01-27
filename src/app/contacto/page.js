@@ -33,22 +33,24 @@ export default function Contacto() {
   };
 
   return (
-    <section className="container mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-center text-gray-800">
-        Contáctanos
-      </h1>
-      <p className="text-center text-gray-600 mt-4">
-        ¿Tienes alguna pregunta o sugerencia? ¡Estamos aquí para ayudarte!
-      </p>
-      <div className="mt-8 max-w-lg mx-auto">
+    <section className="container mx-auto px-6 py-16 mt-16">
+      <div className="text-center">
+        <h1 className="text-4xl font-extrabold text-gray-900">
+          Contáctanos
+        </h1>
+        <p className="text-gray-600 mt-4 text-lg">
+          ¿Tienes alguna pregunta o sugerencia? ¡Estamos aquí para ayudarte!
+        </p>
+      </div>
+      <div className="mt-12 max-w-2xl mx-auto">
         <form
-          className="bg-white shadow rounded-lg p-6 space-y-4"
+          className="bg-white shadow-lg rounded-2xl p-8 space-y-6"
           onSubmit={handleSubmit}
         >
           <div>
             <label
               htmlFor="name"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700 text-sm font-medium mb-2"
             >
               Nombre
             </label>
@@ -57,14 +59,14 @@ export default function Contacto() {
               id="name"
               name="name"
               placeholder="Tu nombre"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
           <div>
             <label
               htmlFor="email"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700 text-sm font-medium mb-2"
             >
               Correo electrónico
             </label>
@@ -73,14 +75,14 @@ export default function Contacto() {
               id="email"
               name="email"
               placeholder="Tu correo electrónico"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
           <div>
             <label
               htmlFor="message"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700 text-sm font-medium mb-2"
             >
               Mensaje
             </label>
@@ -88,14 +90,14 @@ export default function Contacto() {
               id="message"
               name="message"
               placeholder="Tu mensaje"
-              rows="4"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="5"
+              className="w-full px-4 py-3 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             ></textarea>
           </div>
           <button
             type="submit"
-            className="w-full px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold py-3 rounded-lg shadow-lg hover:from-blue-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Enviar mensaje
           </button>

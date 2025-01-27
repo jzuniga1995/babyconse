@@ -2,8 +2,8 @@ import { getConnection } from "../../lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
-// Manejo de solicitudes en la ruta /api/comments
 export async function GET(req) {
+  let connection; // Declarar la conexión fuera del bloque try
   try {
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get("postId");
@@ -11,7 +11,7 @@ export async function GET(req) {
     const limit = parseInt(searchParams.get("limit"), 10) || 20;
     const offset = (page - 1) * limit;
 
-    const connection = await getConnection();
+    connection = await getConnection(); // Obtener conexión
 
     if (postId) {
       // Obtener comentarios de una publicación específica
@@ -19,8 +19,6 @@ export async function GET(req) {
         "SELECT id, post_id, user_name, content, likes, created_at FROM comments WHERE post_id = ? ORDER BY created_at DESC",
         [postId]
       );
-
-      connection.release();
 
       return new Response(JSON.stringify(comments), {
         status: 200,
@@ -50,8 +48,6 @@ export async function GET(req) {
       const totalPosts = countResult[0].total;
       const totalPages = Math.ceil(totalPosts / limit);
 
-      connection.release();
-
       return new Response(
         JSON.stringify({
           posts,
@@ -73,10 +69,13 @@ export async function GET(req) {
       JSON.stringify({ error: "Error al obtener datos" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    if (connection) connection.release(); // Liberar conexión en cualquier caso
   }
 }
 
 export async function POST(req) {
+  let connection; // Declarar la conexión fuera del bloque try
   try {
     const session = await getServerSession(authOptions);
 
@@ -96,15 +95,13 @@ export async function POST(req) {
       );
     }
 
-    const connection = await getConnection();
+    connection = await getConnection(); // Obtener conexión
     const userName = session.user.name || session.user.email;
 
     const [result] = await connection.execute(
       "INSERT INTO comments (post_id, user_name, content) VALUES (?, ?, ?)",
       [postId, userName, content]
     );
-
-    connection.release();
 
     return new Response(
       JSON.stringify({
@@ -122,5 +119,7 @@ export async function POST(req) {
       JSON.stringify({ error: "Error al crear comentario" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    if (connection) connection.release(); // Liberar conexión en cualquier caso
   }
 }
