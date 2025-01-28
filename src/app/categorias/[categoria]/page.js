@@ -1,5 +1,4 @@
 import Link from "next/link";
-import ArticulosRandom from "../../components/ArticulosRandom"; // Importa el componente cliente
 
 // Función para capitalizar correctamente el texto
 function capitalize(text) {
@@ -69,8 +68,36 @@ export default async function CategoriaPage(context) {
         ← Volver a todas las categorías
       </Link>
 
-      {/* Renderizar el componente de artículos aleatorios */}
-      <ArticulosRandom articulos={articulos} />
+      {/* Lista de artículos */}
+      {articulos.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {articulos.map((articulo) => (
+            <Link
+              key={articulo.id}
+              href={`/articulos/${articulo.slug}`}
+              className="group block relative overflow-hidden rounded-lg shadow-md bg-white transition-transform transform hover:scale-105"
+            >
+              <img
+                src={articulo.image || "https://via.placeholder.com/300x200"}
+                alt={`Imagen del artículo ${articulo.title}`}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
+                  {articulo.title}
+                </h3>
+                <p className="text-gray-600 mt-2 text-sm">
+                  {articulo.description}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-gray-600">
+          No se encontraron artículos en esta categoría.
+        </p>
+      )}
     </div>
   );
 }

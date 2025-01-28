@@ -14,14 +14,20 @@ export async function GET(req) {
     const offset = (page - 1) * limit;
 
     // Validar que limit y offset sean números válidos
-    if (limit <= 0 || offset < 0 || isNaN(limit) || isNaN(offset)) {
+    if (isNaN(limit) || isNaN(offset) || limit <= 0 || offset < 0) {
       return new Response(
         JSON.stringify({ error: "Parámetros de paginación inválidos." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Consulta con parámetros en lugar de interpolación
+    console.log("Limit:", limit, "Offset:", offset); // Depuración
+
+    // Convertir limit y offset a enteros explícitamente
+    const limitInt = Math.floor(limit);
+    const offsetInt = Math.floor(offset);
+
+    // Consulta para obtener publicaciones
     const query = `
       SELECT 
         posts.id, 
@@ -34,12 +40,13 @@ export async function GET(req) {
       ORDER BY posts.created_at DESC
       LIMIT ? OFFSET ?
     `;
-    const [rows] = await connection.execute(query, [limit, offset]);
+
+    const [rows] = await connection.query(query, [limitInt, offsetInt]);
 
     // Obtener el total de publicaciones para calcular las páginas
-    const [countResult] = await connection.execute("SELECT COUNT(*) AS total FROM posts");
+    const [countResult] = await connection.query("SELECT COUNT(*) AS total FROM posts");
     const totalPosts = countResult[0].total;
-    const totalPages = Math.ceil(totalPosts / limit);
+    const totalPages = Math.ceil(totalPosts / limitInt);
 
     return new Response(
       JSON.stringify({
@@ -53,7 +60,7 @@ export async function GET(req) {
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error al obtener publicaciones:", error);
+    console.error("Error al obtener publicaciones:", error.message);
     return new Response(
       JSON.stringify({ error: "Error al obtener publicaciones." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
@@ -62,7 +69,6 @@ export async function GET(req) {
     if (connection) connection.release(); // Asegura la liberación en cualquier caso
   }
 }
-
 
 // Manejo de solicitudes POST (crear una nueva publicación)
 export async function POST(req) {
@@ -90,7 +96,7 @@ export async function POST(req) {
     connection = await getConnection();
     const userName = session.user.name || session.user.email;
 
-    const [result] = await connection.execute(
+    const [result] = await connection.query(
       "INSERT INTO posts (user_name, content, likes) VALUES (?, ?, ?)",
       [userName, content, 0]
     );
@@ -107,7 +113,7 @@ export async function POST(req) {
       { status: 201, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error al crear publicación:", error);
+    console.error("Error al crear publicación:", error.message);
     return new Response(
       JSON.stringify({ error: "Error al crear publicación." }),
       { status: 500, headers: { "Content-Type": "application/json" } }

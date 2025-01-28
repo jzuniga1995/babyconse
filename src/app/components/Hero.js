@@ -2,6 +2,10 @@ import Link from "next/link";
 import Button from "./Button";
 
 export default function Hero() {
+  const heroTitle = "Bienvenidos a SaludySer";
+  const heroSubtitle =
+    "Descubre artículos, consejos y herramientas para mejorar tu bienestar físico, mental y emocional.";
+
   return (
     <section className="bg-gradient-to-br from-green-400 via-green-500 to-teal-600 text-white py-20 sm:py-32 relative mt-[64px]">
       {/* Fondo decorativo */}
@@ -22,11 +26,10 @@ export default function Hero() {
       {/* Contenido principal */}
       <div className="container mx-auto px-6 text-center relative animate-fadeIn">
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg mt-6 sm:mt-8">
-          Bienvenidos a <span className="text-yellow-300">SaludySer</span>
+          {heroTitle} <span className="text-yellow-300">SaludySer</span>
         </h1>
         <p className="mt-4 text-sm sm:text-lg lg:text-xl text-gray-100">
-          Descubre artículos, consejos y herramientas para mejorar tu bienestar
-          físico, mental y emocional.
+          {heroSubtitle}
         </p>
 
         {/* Beneficios destacados */}
@@ -57,7 +60,8 @@ export default function Hero() {
             <Button
               text={
                 <>
-                  <span className="inline-block mr-2 text-base sm:text-lg">📖</span> Leer Artículos
+                  <span className="inline-block mr-2 text-base sm:text-lg">📖</span>{" "}
+                  Leer Artículos
                 </>
               }
               className="bg-yellow-400 text-gray-800 font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-yellow-300 hover:shadow-xl hover:scale-110 transition-transform duration-300"
@@ -67,7 +71,8 @@ export default function Hero() {
             <Button
               text={
                 <>
-                  <span className="inline-block mr-2 text-base sm:text-lg">💬</span> Foro
+                  <span className="inline-block mr-2 text-base sm:text-lg">💬</span>{" "}
+                  Foro
                 </>
               }
               className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-400 hover:shadow-xl hover:scale-110 transition-transform duration-300"
@@ -79,7 +84,8 @@ export default function Hero() {
         <div className="mt-8 sm:mt-10">
           <div className="w-20 sm:w-24 mx-auto border-t-2 border-gray-200 my-4"></div>
           <p className="text-sm sm:text-base lg:text-lg text-gray-100 font-light">
-            "Tu bienestar es nuestra prioridad. Explora consejos respaldados por expertos para mejorar tu calidad de vida."
+            "Tu bienestar es nuestra prioridad. Explora consejos respaldados por
+            expertos para mejorar tu calidad de vida."
           </p>
         </div>
       </div>
