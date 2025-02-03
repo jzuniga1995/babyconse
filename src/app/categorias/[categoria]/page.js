@@ -1,6 +1,11 @@
-import Link from "next/link";
+"use client";
 
-// Función para capitalizar correctamente el texto
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import Pagination from "@/app/components/Pagination";
+
 function capitalize(text) {
   if (!text) return "";
   return text
@@ -10,93 +15,119 @@ function capitalize(text) {
     .join(" ");
 }
 
-// SEO dinámico con generateMetadata
-export async function generateMetadata(context) {
-  const params = await Promise.resolve(context.params); // Forzar resolución de parámetros
-  const categoriaSlug = params.categoria;
-  const categoria = capitalize(decodeURIComponent(categoriaSlug.replace(/-/g, " ")));
+export default function CategoriaPage() {
+  const { categoria: categoriaSlug } = useParams();
+  const categoria = categoriaSlug
+    ? capitalize(decodeURIComponent(categoriaSlug.replace(/-/g, " ")))
+    : null;
 
-  return {
-    title: `Artículos sobre ${categoria} - Salud y Ser`,
-    description: `Descubre información sobre ${categoria}, consejos y más temas relacionados.`,
-    openGraph: {
-      title: `Artículos sobre ${categoria} - Salud y Ser`,
-      description: `Explora información valiosa sobre ${categoria}.`,
-      url: `https://tu-sitio.com/categorias/${categoriaSlug}`,
-      type: "website",
-    },
-    alternates: {
-      canonical: `https://tu-sitio.com/categorias/${categoriaSlug}`,
-    },
-  };
-}
+  const [articulos, setArticulos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const limit = 9;
 
-export default async function CategoriaPage(context) {
-  const params = await Promise.resolve(context.params); // Forzar resolución de parámetros
-  const categoriaSlug = params.categoria;
-  const categoria = capitalize(decodeURIComponent(categoriaSlug.replace(/-/g, " ")));
-
-  let articulos = [];
-  try {
-    const response = await fetch(
-      `http://localhost:3000/api/articulos?category=${categoria}`,
-      { cache: "no-store" }
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      articulos = data.data || [];
-    } else {
-      console.error(`Error al obtener artículos: ${response.statusText}`);
+  useEffect(() => {
+    if (!categoria) {
+      setError("Categoría no válida.");
+      return;
     }
-  } catch (error) {
-    console.error("Error al obtener los artículos:", error.message);
-  }
+
+    const controller = new AbortController();
+    const fetchArticulos = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const offset = (page - 1) * limit;
+        const response = await fetch(
+          `http://localhost:3000/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
+          { signal: controller.signal, cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error al obtener artículos: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setArticulos(data.data || []);
+        setPages(Math.ceil(data.total / limit));
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setError(error.message);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArticulos();
+
+    return () => controller.abort();
+  }, [categoria, page]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <div className="container mx-auto px-6 py-12">
-      {/* Título de la categoría */}
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">
-        Artículos sobre {categoria}
-      </h1>
-
-      {/* Botón para regresar */}
-      <Link
-        href="/articulos"
-        className="inline-block mb-6 text-blue-500 hover:text-blue-700 transition"
-      >
-        ← Volver a todas las categorías
-      </Link>
-
-      {/* Lista de artículos */}
-      {articulos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articulos.map((articulo) => (
-            <Link
-              key={articulo.id}
-              href={`/articulos/${articulo.slug}`}
-              className="group block relative overflow-hidden rounded-lg shadow-md bg-white transition-transform transform hover:scale-105"
-            >
-              <img
-                src={articulo.image || "https://via.placeholder.com/300x200"}
-                alt={`Imagen del artículo ${articulo.title}`}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
-                  {articulo.title}
-                </h3>
-                <p className="text-gray-600 mt-2 text-sm">
-                  {articulo.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+      {categoria ? (
+        <>
+          <h1 className="text-4xl font-bold text-gray-800 mb-8">
+            Artículos sobre {categoria}
+          </h1>
+          <Link
+            href="/articulos"
+            className="inline-block mb-6 text-blue-500 hover:text-blue-700 transition"
+          >
+            ← Explorar todas las categorías
+          </Link>
+        </>
       ) : (
-        <p className="text-center text-gray-600">
-          No se encontraron artículos en esta categoría.
-        </p>
+        <h1 className="text-4xl font-bold text-gray-800 mb-8">Categoría no válida</h1>
+      )}
+
+      {isLoading ? (
+        <p className="text-center text-gray-600">Cargando artículos...</p>
+      ) : error ? (
+        <p className="text-center text-red-600">{error}</p>
+      ) : articulos.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articulos.map((articulo) => (
+              <Link
+                key={articulo.id}
+                href={`/articulos/${articulo.slug}`}
+                className="group block relative overflow-hidden rounded-lg shadow-md bg-white transition-transform transform hover:scale-105"
+              >
+                <div className="relative w-full h-48">
+                  <Image
+                    src={articulo.image || "/images/default.jpg"}
+                    alt={`Imagen del artículo ${articulo.title}`}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-t-lg"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
+                    {articulo.title}
+                  </h3>
+                  <p className="text-gray-600 mt-2 text-sm">
+                    {articulo.description || "Descripción no disponible."}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8">
+            <Pagination page={page} pages={pages} onPageChange={handlePageChange} />
+          </div>
+        </>
+      ) : (
+        <p className="text-center text-gray-600">No se encontraron artículos en esta categoría.</p>
       )}
     </div>
   );

@@ -1,10 +1,11 @@
 import ReactMarkdown from "react-markdown";
 import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
+import Image from "next/image";
 
-// Generar Metadata Dinámica
+// 📌 Generar Metadata Dinámica con SEO
 export async function generateMetadata(context) {
-  const params = await Promise.resolve(context.params); // Resolver `params` explícitamente
+  const params = await Promise.resolve(context.params);
   const { slug } = params;
 
   let metadata = {
@@ -25,21 +26,60 @@ export async function generateMetadata(context) {
     });
 
     if (response.ok) {
-      const articulo = await response.json();
+      const data = await response.json();
+      const articulo = data.articulo;
 
       metadata = {
-        title: `${articulo.title} - Salud y Ser`,
-        description: articulo.description,
+        title: `${articulo.title} | Salud y Ser`,
+        description: articulo.meta_description || articulo.description || "Lee más sobre este interesante tema.",
         openGraph: {
           title: articulo.title,
-          description: articulo.description,
+          description: articulo.meta_description || articulo.description || "Descubre más información útil.",
           type: "article",
           image: articulo.image || "/default-image.jpg",
           url: `https://tusitio.com/articulos/${slug}`,
+          article: {
+            published_time: articulo.published_at || new Date().toISOString(),
+            author: "Salud y Ser",
+          },
         },
         alternates: {
           canonical: `https://tusitio.com/articulos/${slug}`,
         },
+        keywords: articulo.meta_keywords
+          ? articulo.meta_keywords.split(",").map((kw) => kw.trim())
+          : [
+              articulo.category,
+              articulo.title,
+              "bienestar",
+              "salud",
+              "artículos de salud",
+            ],
+        scripts: [
+          {
+            type: "application/ld+json",
+            innerHTML: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": articulo.title,
+              "image": articulo.image || "/default-image.jpg",
+              "author": {
+                "@type": "Person",
+                "name": "Salud y Ser",
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Salud y Ser",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://tusitio.com/logo.jpg",
+                },
+              },
+              "datePublished": articulo.published_at || new Date().toISOString(),
+              "description": articulo.meta_description || articulo.description,
+            }),
+          },
+        ],
       };
     }
   } catch (error) {
@@ -49,45 +89,35 @@ export async function generateMetadata(context) {
   return metadata;
 }
 
-// Componente de Detalles de Artículo
+// 📌 Componente de Detalles de Artículo
 export default async function ArticuloDetallesPage(context) {
-  const params = await Promise.resolve(context.params); // Resolver `params` explícitamente
+  const params = await Promise.resolve(context.params);
   const { slug } = params;
-
-  if (!slug) {
-    console.error("Slug no proporcionado en el frontend.");
-    return (
-      <section className="bg-gray-50 min-h-screen flex items-center justify-center">
-        <p>Error: Slug no válido.</p>
-      </section>
-    );
-  }
 
   let articulo = null;
   let articulosRelacionados = [];
+  let referencias = [];
 
   try {
-    // Fetch del artículo principal
+    // Obtener artículo y relacionados
     const response = await fetch(`http://localhost:3000/api/articulos/${slug}`, {
       cache: "no-store",
     });
 
     if (!response.ok) throw new Error("No se encontró el artículo.");
-    articulo = await response.json();
+    const data = await response.json();
 
-    // Fetch de los artículos relacionados
-    const relacionadosResponse = await fetch(
-      `http://localhost:3000/api/articulos?category=${encodeURIComponent(
-        articulo.category
-      )}&limit=5`,
-      { cache: "no-store" }
-    );
+    articulo = data.articulo;
+    articulosRelacionados = data.relacionados;
 
-    if (relacionadosResponse.ok) {
-      const relacionadosData = await relacionadosResponse.json();
-      articulosRelacionados = relacionadosData.data.filter(
-        (a) => a.slug !== slug
-      );
+    // Obtener referencias
+    const refResponse = await fetch(`http://localhost:3000/api/articulo_referencias/${articulo.id}`, {
+      cache: "no-store",
+    });
+
+    if (refResponse.ok) {
+      const refData = await refResponse.json();
+      referencias = refData.references || [];
     }
   } catch (error) {
     console.error("Error al obtener los datos:", error.message);
@@ -95,7 +125,7 @@ export default async function ArticuloDetallesPage(context) {
 
   return (
     <section className="bg-gray-50 min-h-screen py-10 mt-16">
-
+      {/* Volver al listado */}
       <div className="max-w-4xl mx-auto px-4">
         <Link
           href="/articulos"
@@ -106,62 +136,108 @@ export default async function ArticuloDetallesPage(context) {
         </Link>
       </div>
 
-      {/* Render del artículo */}
-      <div className="max-w-4xl mx-auto px-4 mt-6">
-        {articulo?.image && (
-          <img
+      {/* Imagen principal */}
+      {articulo?.image && (
+        <div className="max-w-4xl mx-auto px-4 mt-6">
+          <Image
             src={articulo.image}
-            alt={`Imagen del artículo ${articulo.title}`}
-            className="w-full h-64 object-cover rounded-lg shadow-md"
+            alt={`Imagen del artículo: ${articulo.title}`}
+            width={800}
+            height={450}
+            className="rounded-lg shadow-md"
+            priority
           />
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="max-w-4xl mx-auto px-4 mt-8 bg-white p-6 rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">
-          {articulo?.title || "Artículo no encontrado"}
-        </h1>
-        <p className="text-lg text-gray-600 mb-6 text-center">
-          {articulo?.description || "Descripción no disponible."}
-        </p>
-        <div className="text-gray-700 leading-relaxed border-t border-gray-200 pt-4">
-          <ReactMarkdown>
+      {/* Contenido principal del artículo */}
+      <div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
+        {/* Contenido principal con Markdown */}
+        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
+          <ReactMarkdown
+            components={{
+              h2: ({ node, ...props }) => (
+                <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 className="text-xl font-medium text-gray-700 mt-6" {...props} />
+              ),
+              blockquote: ({ node, ...props }) => (
+                <blockquote
+                  className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4"
+                  {...props}
+                />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul className="list-disc pl-6 space-y-2" {...props} />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol className="list-decimal pl-6 space-y-2" {...props} />
+              ),
+              li: ({ node, ...props }) => <li className="mb-2" {...props} />,
+            }}
+          >
             {articulo?.full_content || "Contenido no disponible."}
           </ReactMarkdown>
         </div>
+
+        {/* Fuentes o Referencias */}
+        {referencias.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-xl font-bold text-gray-800 border-b border-gray-300 pb-2">
+              Fuentes y Referencias
+            </h2>
+            <ul className="list-disc pl-6 mt-4 space-y-2">
+              {referencias.map((ref, index) => (
+                <li key={index}>
+                  <a
+                    href={ref.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-700 underline"
+                  >
+                    {ref.title || "Referencia sin título"}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {/* Render de artículos relacionados */}
-      {articulosRelacionados.length > 0 && (
+      {/* Artículos relacionados */}
+      {articulosRelacionados.length > 0 ? (
         <div className="max-w-4xl mx-auto px-4 mt-10">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            Más artículos sobre {articulo?.category}
+            Más artículos sobre {articulo?.category || "este tema"}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {articulosRelacionados.map((rel) => (
-              <Link
-                key={rel.slug}
-                href={`/articulos/${rel.slug}`}
-                className="block group"
-              >
-                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <img
+              <Link key={rel.id} href={`/articulos/${rel.slug}`} className="block group">
+                <div className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition">
+                  <Image
                     src={rel.image || "/default-image.jpg"}
-                    alt={`Imagen del artículo ${rel.title}`}
-                    className="w-full h-48 object-cover"
+                    alt={`Imagen del artículo: ${rel.title}`}
+                    width={400}
+                    height={200}
+                    className="object-cover"
                   />
                   <div className="p-4">
-                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-500">
-                      {rel.title}
+                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-500 transition-colors">
+                      {rel.title || "Título no disponible"}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-2">
-                      {rel.description}
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                      {rel.meta_description || rel.description || "No hay descripción disponible."}
                     </p>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
+          <p className="text-gray-600">No se encontraron artículos relacionados.</p>
         </div>
       )}
     </section>

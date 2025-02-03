@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import CookieConsent from "./components/CookieConsent";
 import { SessionProvider } from "next-auth/react";
+import { Analytics } from "@vercel/analytics/react"; // ✅ Importación de Vercel Analytics
 
 export default function RootLayout({ children }) {
   return (
@@ -17,6 +18,9 @@ export default function RootLayout({ children }) {
           <Footer />
           <CookieConsent />
         </SessionProvider>
+
+        {/* ✅ Analítica de Vercel */}
+        <Analytics />
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-"use client";
+"use client"; // Necesario para manejar estados en el cliente
 
 import Link from "next/link";
 import { useState } from "react";
@@ -17,33 +17,33 @@ export default function Header() {
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
         {/* Logo */}
         <div className="flex flex-col">
-          <Link href="/" className="text-3xl font-bold tracking-wide">
+          <Link href="/" className="text-2xl md:text-3xl font-bold tracking-wide">
             SaludySer
           </Link>
-          <p className="text-sm text-green-200 mt-1">
+          <p className="text-xs md:text-sm text-green-200 mt-1">
             Tu guía para el bienestar físico y mental
           </p>
         </div>
 
         {/* Navegación en escritorio */}
         <nav className="hidden sm:flex items-center gap-8">
-          <Link href="/" className="text-lg hover:text-green-200 transition-all">
+          <Link href="/" className="text-base md:text-lg hover:text-green-200 transition-all">
             Inicio
           </Link>
-          <Link href="/articulos" className="text-lg hover:text-green-200 transition-all">
+          <Link href="/articulos" className="text-base md:text-lg hover:text-green-200 transition-all">
             Artículos
           </Link>
-          <Link href="/foro" className="text-lg hover:text-green-200 transition-all">
+          <Link href="/foro" className="text-base md:text-lg hover:text-green-200 transition-all">
             Foro
           </Link>
-          <Link href="/contacto" className="text-lg hover:text-green-200 transition-all">
+          <Link href="/contacto" className="text-base md:text-lg hover:text-green-200 transition-all">
             Contacto
           </Link>
           {isLoading ? (
-            <p className="text-lg">Cargando...</p>
+            <p className="text-base md:text-lg">Cargando...</p>
           ) : user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-green-200">Hola, {user.name}</span>
+              <span className="text-sm md:text-base text-green-200">Hola, {user.name}</span>
               <button
                 onClick={() => signOut()}
                 className="bg-white text-green-600 font-semibold px-4 py-2 rounded-full hover:bg-green-100 transition-all"
@@ -60,30 +60,30 @@ export default function Header() {
             </button>
           )}
         </nav>
-{/* Botón Menú móvil */}
-<button
-  onClick={() => setIsOpen(true)} // Solo abre el menú
-  className="block sm:hidden text-white focus:outline-none z-50"
-  aria-label="Abrir menú"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-8 w-8"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 6h16M4 12h16M4 18h16" // Ícono de menú hamburguesa
-    />
-  </svg>
-</button>
 
+        {/* Botón Menú móvil */}
+        <button
+          onClick={() => setIsOpen(true)}
+          className="block sm:hidden text-white focus:outline-none z-50"
+          aria-label="Abrir menú"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
 
-        {/* SideMenu para móvil */}
+        {/* Menú lateral móvil */}
         <SideMenu
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}

@@ -90,7 +90,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Sección decorativa de estadísticas */}
+      {/* Sección decorativa de estadísticas 
       <div className="mt-12 container mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
         <div>
           <h3 className="text-2xl font-extrabold text-yellow-300">+100</h3>
@@ -104,7 +104,7 @@ export default function Hero() {
           <h3 className="text-2xl font-extrabold text-yellow-300">+5</h3>
           <p className="text-sm text-gray-100">Áreas de enfoque</p>
         </div>
-      </div>
+      </div>*/}
     </section>
   );
 }

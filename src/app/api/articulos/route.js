@@ -1,21 +1,43 @@
 import { getConnection } from "../../lib/db";
 import { generateSlug } from "../../utils/slugify";
 
-// Manejar solicitudes GET para obtener todos los artículos
+// Manejar solicitudes GET para obtener artículos con soporte para paginación
 export async function GET(request) {
   let connection;
 
   try {
     connection = await getConnection();
 
-    const [rows] = await connection.query(
-      "SELECT id, title, slug, description, image, category FROM articulos"
-    );
+    const url = new URL(request.url);
+    const category = url.searchParams.get("category");
+    const limit = parseInt(url.searchParams.get("limit"), 10) || 10;
+    const offset = parseInt(url.searchParams.get("offset"), 10) || 0;
 
-    return new Response(JSON.stringify({ data: rows }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    // Construir la consulta SQL
+    let query = `
+      SELECT SQL_CALC_FOUND_ROWS 
+        id, title, slug, description, image, category, 
+        meta_keywords, meta_description, full_content, published_at, views
+      FROM articulos
+    `;
+    const queryParams = [];
+
+    if (category) {
+      query += " WHERE category = ?";
+      queryParams.push(category);
+    }
+
+    query += " LIMIT ?, ?";
+    queryParams.push(offset, limit);
+
+    // Ejecutar consultas
+    const [rows] = await connection.query(query, queryParams);
+    const [totalRows] = await connection.query("SELECT FOUND_ROWS() as total");
+
+    return new Response(
+      JSON.stringify({ data: rows, total: totalRows[0].total }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("Error al obtener los artículos:", error);
     return new Response(
@@ -33,24 +55,33 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { title, description, link, image, category, full_content } = body;
+    const {
+      title,
+      description,
+      link,
+      image,
+      category,
+      full_content,
+      meta_keywords,
+      meta_description,
+      referencias,
+    } = body;
 
-    // Validación de campos obligatorios
-    if (!title || !description || !category) {
+    // Validar campos obligatorios
+    if (!title || !description || !category || !full_content) {
       return new Response(
         JSON.stringify({
-          error: "El título, descripción y categoría son obligatorios.",
+          error: "El título, descripción, categoría y contenido son obligatorios.",
         }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Generar el slug a partir del título
     const slug = generateSlug(title);
 
     connection = await getConnection();
 
-    // Verificar si el slug ya existe
+    // Verificar slug duplicado
     const [existingSlug] = await connection.query(
       "SELECT id FROM articulos WHERE slug = ?",
       [slug]
@@ -58,32 +89,54 @@ export async function POST(request) {
 
     if (existingSlug.length > 0) {
       return new Response(
-        JSON.stringify({
-          error: "El slug generado ya existe. Intenta con otro título.",
-        }),
+        JSON.stringify({ error: "El slug generado ya existe. Intenta con otro título." }),
         { status: 409, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Insertar el nuevo artículo en la base de datos
+    // Insertar el artículo
     const [result] = await connection.query(
-      `INSERT INTO articulos (title, description, link, image, category, full_content, slug)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [title, description, link, image, category, full_content, slug]
+      `INSERT INTO articulos (
+        title, description, link, image, category, full_content, slug, 
+        meta_keywords, meta_description, published_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        title,
+        description,
+        link || null,
+        image || null,
+        category,
+        full_content,
+        slug,
+        meta_keywords || null,
+        meta_description || null,
+      ]
     );
 
+    const articuloId = result.insertId;
+
+    // Insertar referencias
+    if (Array.isArray(referencias) && referencias.length > 0) {
+      const referenciaQueries = referencias.map((ref) => [
+        articuloId,
+        ref.title,
+        ref.link,
+      ]);
+
+      await connection.query(
+        "INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ?",
+        [referenciaQueries]
+      );
+    }
+
     return new Response(
-      JSON.stringify({
-        message: "Artículo creado con éxito",
-        id: result.insertId,
-        slug,
-      }),
+      JSON.stringify({ message: "Artículo creado con éxito", id: articuloId, slug }),
       { status: 201, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error al crear el artículo:", error);
     return new Response(
-      JSON.stringify({ error: "Error al crear el artículo" }),
+      JSON.stringify({ error: "Error al crear el artículo." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   } finally {

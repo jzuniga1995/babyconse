@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { generateSlug } from "../utils/slugify"; // Importar la función reutilizable
+import Image from "next/image";
+import { generateSlug } from "../utils/slugify";
 
 // Definir categorías predeterminadas
 const defaultCategorias = [
@@ -53,9 +54,6 @@ const defaultCategorias = [
     bgColor: "bg-red-50",
     textColor: "text-red-800",
   },
-
-
-
 ];
 
 export default function MenuCategorias({ categorias }) {
@@ -74,16 +72,20 @@ export default function MenuCategorias({ categorias }) {
           <Link
             key={index}
             href={`/categorias/${generateSlug(category.name)}`} // Generar el slug con la función importada
+            aria-label={`Explorar categoría: ${category.name}`}
+            className="group"
           >
             <div
-              className="relative group rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 cursor-pointer"
+              className="relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105"
               style={{ height: "250px" }}
             >
-              {/* Imagen de fondo */}
-              <img
+              {/* Imagen optimizada con `next/image` */}
+              <Image
                 src={category.image || "/images/default.jpg"}
                 alt={`Categoría ${category.name}`}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                layout="fill"
+                objectFit="cover"
+                className="transition-transform duration-500 group-hover:scale-110"
               />
               {/* Filtro oscuro para legibilidad */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-50 group-hover:opacity-60 transition duration-300"></div>

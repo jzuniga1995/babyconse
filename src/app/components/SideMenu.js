@@ -1,3 +1,5 @@
+"use client"; // Indica que este componente es un Client Component
+
 import Link from "next/link";
 import QuickStats from "./QuickStats";
 import SocialLinks from "./SocialLinks";
@@ -8,7 +10,7 @@ export default function SideMenu({ isOpen, onClose, user, isLoading }) {
     <div
       className={`fixed top-0 left-0 h-full bg-green-700 text-white z-40 transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      } w-4/5 max-w-sm sm:hidden shadow-lg`}
+      } w-3/4 max-w-xs shadow-lg`}
     >
       {/* Botón de cierre */}
       <button
@@ -22,7 +24,7 @@ export default function SideMenu({ isOpen, onClose, user, isLoading }) {
       {/* Contenido del Menú */}
       <div className="p-6 flex flex-col justify-between h-full">
         {/* Información del Usuario */}
-        <div className="text-center">
+        <div className="text-center mb-8">
           {isLoading ? (
             <p className="text-lg">Cargando...</p>
           ) : user ? (
@@ -53,7 +55,7 @@ export default function SideMenu({ isOpen, onClose, user, isLoading }) {
 
         {/* Enlaces principales */}
         <nav className="mt-6">
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {[
               { href: "/", label: "Inicio", icon: "M3 10h11M9 21V3M9 21l-6-6m6 6l6-6" },
               { href: "/articulos", label: "Artículos", icon: "M3 5h16M8 5V3M16 5V3M5 15h14" },
