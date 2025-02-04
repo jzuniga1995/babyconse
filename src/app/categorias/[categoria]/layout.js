@@ -8,9 +8,11 @@ export async function generateStaticParams() {
 
     const data = await response.json();
 
-    return Array.isArray(data) ? data.map((categoria) => ({
-      categoria: categoria.slug,
-    })) : [];
+    return Array.isArray(data)
+      ? data.map((categoria) => ({
+          categoria: categoria.slug,
+        }))
+      : [];
   } catch (error) {
     console.error("Error al generar rutas estáticas:", error.message);
     return []; // Devolver un arreglo vacío para evitar que el build falle

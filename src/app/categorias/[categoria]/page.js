@@ -73,59 +73,43 @@ export default async function CategoriaPage({ params, searchParams }) {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      {categoria ? (
-        <>
-          <h1 className="text-4xl font-bold text-gray-800 mb-8">
-            Artículos sobre {capitalize(categoria)}
-          </h1>
-          <Link
-            href="/articulos"
-            className="inline-block mb-6 text-blue-500 hover:text-blue-700 transition"
-          >
-            ← Explorar todas las categorías
-          </Link>
-        </>
-      ) : (
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Categoría no válida</h1>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {articulos.length > 0 ? (
+          articulos.map((articulo) => (
+            <Link
+              key={articulo.id}
+              href={`/articulos/${articulo.slug}`}
+              className="group block relative overflow-hidden rounded-lg shadow-md bg-white transition-transform transform hover:scale-105"
+            >
+              <div className="relative w-full h-48">
+                <Image
+                  src={articulo.image || "/images/default.jpg"}
+                  alt={`Imagen del artículo ${articulo.title}`}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-t-lg"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
+                  {articulo.title}
+                </h3>
+                <p className="text-gray-600 mt-2 text-sm">
+                  {articulo.description || "Descripción no disponible."}
+                </p>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p className="text-center text-gray-600">
+            No se encontraron artículos en esta categoría.
+          </p>
+        )}
+      </div>
 
-      {articulos.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articulos.map((articulo) => (
-              <Link
-                key={articulo.id}
-                href={`/articulos/${articulo.slug}`}
-                className="group block relative overflow-hidden rounded-lg shadow-md bg-white transition-transform transform hover:scale-105"
-              >
-                <div className="relative w-full h-48">
-                  <Image
-                    src={articulo.image || "/images/default.jpg"}
-                    alt={`Imagen del artículo ${articulo.title}`}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-t-lg"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
-                    {articulo.title}
-                  </h3>
-                  <p className="text-gray-600 mt-2 text-sm">
-                    {articulo.description || "Descripción no disponible."}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
-          </div>
-        </>
-      ) : (
-        <p className="text-center text-gray-600">No se encontraron artículos en esta categoría.</p>
-      )}
+      <div className="mt-8">
+        <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
+      </div>
     </div>
   );
 }
