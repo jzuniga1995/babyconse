@@ -4,12 +4,10 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    // Log de parámetros iniciales
     console.log("context.params:", context.params);
 
     const { categoria } = context.params;
 
-    // Validar el parámetro `categoria`
     if (!categoria || typeof categoria !== "string" || categoria.trim() === "") {
       console.warn("Categoría no válida o no proporcionada.");
       return new Response(
@@ -25,11 +23,9 @@ export async function GET(request, context) {
     console.log("Conexión a la base de datos establecida.");
 
     let categoriaNombre;
-
     try {
-      categoriaNombre = decodeURIComponent(categoria)
-        .replace(/-/g, " ")
-        .toLowerCase();
+      categoriaNombre = decodeURIComponent(categoria).replace(/-/g, " ").toLowerCase();
+      console.log("Nombre de la categoría decodificado:", categoriaNombre);
     } catch (error) {
       console.error("Error al decodificar la categoría:", error.message);
       return new Response(
@@ -41,9 +37,6 @@ export async function GET(request, context) {
       );
     }
 
-    console.log("Nombre de la categoría decodificado:", categoriaNombre);
-
-    // Consultar la base de datos para la categoría
     const [rows] = await connection.query(
       `SELECT 
          category AS name, 
@@ -74,11 +67,11 @@ export async function GET(request, context) {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599", // Cache por 1 hora
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599",
       },
     });
   } catch (error) {
-    console.error("Error al obtener datos de la categoría:", error.message, error.stack);
+    console.error("Error interno del servidor:", error.message, error.stack);
 
     return new Response(
       JSON.stringify({ error: "Error interno del servidor." }),
@@ -88,6 +81,13 @@ export async function GET(request, context) {
       }
     );
   } finally {
-    if (connection) connection.release();
+    if (connection) {
+      try {
+        connection.release();
+        console.log("Conexión liberada.");
+      } catch (releaseError) {
+        console.error("Error al liberar la conexión:", releaseError.message);
+      }
+    }
   }
 }
