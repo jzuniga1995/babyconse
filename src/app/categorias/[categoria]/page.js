@@ -38,9 +38,7 @@ export async function generateMetadata({ params }) {
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
   const categoriaSlug = params.categoria;
-  const categoria = categoriaSlug
-    ? decodeURIComponent(categoriaSlug.replace(/-/g, " "))
-    : "Categoría no válida";
+  const categoria = categoriaSlug ? decodeURIComponent(categoriaSlug.replace(/-/g, " ")) : "Categoría no válida";
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
@@ -64,11 +62,7 @@ export default async function CategoriaPage({ params, searchParams }) {
   const pages = total > 0 ? Math.ceil(total / limit) : 0;
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-gray-800 text-center mb-6 lg:mb-8">
-        {categoria}
-      </h1>
-
+    <div className="container mx-auto px-6 py-12">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {articulos.length > 0 ? (
           articulos.map((articulo) => (
@@ -87,7 +81,7 @@ export default async function CategoriaPage({ params, searchParams }) {
                 />
               </div>
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-500 transition">
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
                   {articulo.title}
                 </h3>
                 <p className="text-gray-600 mt-2 text-sm">
@@ -103,7 +97,7 @@ export default async function CategoriaPage({ params, searchParams }) {
         )}
       </div>
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8">
         <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
       </div>
     </div>
