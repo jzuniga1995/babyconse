@@ -4,11 +4,14 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    // Resolver el parámetro `categoria`
+    // Log de parámetros iniciales
+    console.log("context.params:", context.params);
+
     const { categoria } = context.params;
 
     // Validar el parámetro `categoria`
     if (!categoria || typeof categoria !== "string" || categoria.trim() === "") {
+      console.warn("Categoría no válida o no proporcionada.");
       return new Response(
         JSON.stringify({ error: "Categoría no válida o no proporcionada." }),
         {
@@ -19,11 +22,26 @@ export async function GET(request, context) {
     }
 
     connection = await getConnection();
+    console.log("Conexión a la base de datos establecida.");
 
-    // Normalizar el slug de la categoría para búsqueda
-    const categoriaNombre = decodeURIComponent(categoria)
-      .replace(/-/g, " ")
-      .toLowerCase();
+    let categoriaNombre;
+
+    try {
+      categoriaNombre = decodeURIComponent(categoria)
+        .replace(/-/g, " ")
+        .toLowerCase();
+    } catch (error) {
+      console.error("Error al decodificar la categoría:", error.message);
+      return new Response(
+        JSON.stringify({ error: "Categoría no válida o malformada." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    console.log("Nombre de la categoría decodificado:", categoriaNombre);
 
     // Consultar la base de datos para la categoría
     const [rows] = await connection.query(
@@ -37,7 +55,10 @@ export async function GET(request, context) {
       [categoriaNombre]
     );
 
+    console.log("Resultados de la consulta:", rows);
+
     if (rows.length === 0) {
+      console.warn("Categoría no encontrada:", categoriaNombre);
       return new Response(
         JSON.stringify({ error: "Categoría no encontrada." }),
         {
@@ -49,7 +70,6 @@ export async function GET(request, context) {
 
     const data = rows[0];
 
-    // Respuesta exitosa con datos
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
