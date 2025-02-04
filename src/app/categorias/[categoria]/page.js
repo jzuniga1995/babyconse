@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import Pagination from "@/app/components/Pagination";
+import PaginationWrapper from "@/app/components/PaginationWrapper"; // Nueva capa para manejar la paginación en el cliente
 
 // Capitalizar texto
 function capitalize(text) {
@@ -120,15 +120,7 @@ export default async function CategoriaPage({ params, searchParams }) {
           </div>
 
           <div className="mt-8">
-            <Pagination
-              page={page}
-              pages={pages}
-              onPageChange={(newPage) =>
-                window.location.assign(
-                  `/categorias/${categoriaSlug}?page=${newPage}`
-                )
-              }
-            />
+            <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
           </div>
         </>
       ) : (
