@@ -1,16 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import PaginationWrapper from "@/app/components/PaginationWrapper"; // Nueva capa para manejar la paginación en el cliente
-
-// Capitalizar texto
-function capitalize(text) {
-  if (!text) return "";
-  return text
-    .toLowerCase()
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import PaginationWrapper from "@/app/components/PaginationWrapper";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
 const limit = 9;
@@ -48,7 +38,7 @@ export async function generateMetadata({ params }) {
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
   const categoriaSlug = params.categoria;
-  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
+  const categoria = categoriaSlug ? decodeURIComponent(categoriaSlug.replace(/-/g, " ")) : "Categoría no válida";
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
@@ -69,7 +59,7 @@ export default async function CategoriaPage({ params, searchParams }) {
     console.error("Error al obtener artículos para la categoría:", error.message);
   }
 
-  const pages = Math.ceil(total / limit);
+  const pages = total > 0 ? Math.ceil(total / limit) : 0;
 
   return (
     <div className="container mx-auto px-6 py-12">
@@ -83,8 +73,8 @@ export default async function CategoriaPage({ params, searchParams }) {
             >
               <div className="relative w-full h-48">
                 <Image
-                  src={articulo.image || "/images/default.jpg"}
-                  alt={`Imagen del artículo ${articulo.title}`}
+                  src={articulo.image?.startsWith("http") ? articulo.image : "/images/default.jpg"}
+                  alt={`Imagen del artículo ${articulo.title || "sin título"}`}
                   layout="fill"
                   objectFit="cover"
                   className="rounded-t-lg"
@@ -101,7 +91,7 @@ export default async function CategoriaPage({ params, searchParams }) {
             </Link>
           ))
         ) : (
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 mt-8 text-lg">
             No se encontraron artículos en esta categoría.
           </p>
         )}
