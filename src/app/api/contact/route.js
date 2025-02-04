@@ -5,19 +5,21 @@ export async function POST(req) {
     // Parsear los datos del cuerpo de la solicitud
     const { name, email, message } = await req.json();
 
-    // Configurar el transportador de correo con Gmail
+    // Configurar el transportador de correo con Zoho SMTP
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.zoho.com", // Servidor SMTP de Zoho
+      port: 465, // Puerto para SSL
+      secure: true, // Usar conexión segura
       auth: {
-        user: process.env.GMAIL_USER, // Tu correo de Gmail
-        pass: process.env.GMAIL_PASS, // Contraseña o App Password
+        user: process.env.EMAIL_FROM, // Tu correo de Zoho
+        pass: process.env.EMAIL_PASS, // Contraseña de la app generada en Zoho
       },
     });
 
     // Enviar el correo
     await transporter.sendMail({
-      from: `"Formulario de contacto" <${email}>`, // Remitente
-      to: process.env.GMAIL_USER, // Tu correo de destino
+      from: `"Formulario de contacto" <${process.env.EMAIL_FROM}>`, // Remitente
+      to: process.env.EMAIL_TO || process.env.EMAIL_FROM, // Correo de destino
       subject: `Nuevo mensaje de ${name}`, // Asunto
       text: message, // Mensaje en texto plano
       html: `

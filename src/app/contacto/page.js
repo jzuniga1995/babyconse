@@ -4,6 +4,7 @@ export default function Contacto() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Captura los datos del formulario
     const formData = {
       name: e.target.name.value,
       email: e.target.email.value,
@@ -11,6 +12,7 @@ export default function Contacto() {
     };
 
     try {
+      // Llama a la API de contacto
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -21,23 +23,21 @@ export default function Contacto() {
 
       const result = await response.json();
       if (result.success) {
-        alert("Mensaje enviado exitosamente.");
-        e.target.reset(); // Limpia el formulario
+        alert("Mensaje enviado exitosamente. ¡Gracias por contactarnos!");
+        e.target.reset(); // Limpia el formulario después del envío
       } else {
-        alert("Hubo un problema al enviar el mensaje.");
+        alert("Hubo un problema al enviar el mensaje. Por favor, inténtalo más tarde.");
       }
     } catch (error) {
       console.error("Error al enviar el mensaje:", error);
-      alert("Ocurrió un error. Por favor, inténtalo más tarde.");
+      alert("Ocurrió un error. Por favor, inténtalo nuevamente.");
     }
   };
 
   return (
     <section className="container mx-auto px-6 py-16 mt-16">
       <div className="text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900">
-          Contáctanos
-        </h1>
+        <h1 className="text-4xl font-extrabold text-gray-900">Contáctanos</h1>
         <p className="text-gray-600 mt-4 text-lg">
           ¿Tienes alguna pregunta o sugerencia? ¡Estamos aquí para ayudarte!
         </p>
