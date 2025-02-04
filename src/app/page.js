@@ -3,10 +3,12 @@ import Hero from "./components/Hero";
 import ArticulosRandom from "./components/ArticulosRandom";
 import Link from "next/link";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
+
 // Función para obtener artículos en el servidor
 async function fetchArticulos() {
   try {
-    const response = await fetch("http://localhost:3000/api/articulos", {
+    const response = await fetch(`${baseUrl}/api/articulos`, {
       cache: "no-store",
     });
 
@@ -17,14 +19,14 @@ async function fetchArticulos() {
     const data = await response.json();
     return data.data || [];
   } catch (error) {
-    console.error(error.message);
+    console.error("Error al obtener los artículos:", error.message);
     return [];
   }
 }
 
 // Generar metadatos dinámicos basados en datos de la API
 export async function generateMetadata() {
-  const metadataBase = new URL("https://tusitio.com");
+  const metadataBase = new URL(baseUrl);
   const articulos = await fetchArticulos();
 
   let metadata = {
@@ -39,7 +41,7 @@ export async function generateMetadata() {
       url: metadataBase.href,
       images: [
         {
-          url: `${metadataBase.href}images/og-image-home.jpg`,
+          url: `${metadataBase.href}/images/og-image-home.jpg`,
           alt: "Salud y Ser - Página Principal",
         },
       ],
@@ -72,7 +74,10 @@ export async function generateMetadata() {
           .map((a) => a.title)
           .join(", ")} para mejorar tu bienestar físico y mental.`,
         images: topArticulos.map((articulo) => ({
-          url: new URL(articulo.image || "/images/default.jpg", metadataBase).href,
+          url: new URL(
+            articulo.image || "/images/default.jpg",
+            metadataBase
+          ).href,
           alt: articulo.title,
         })),
       },

@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+export const dynamic = "force-dynamic"; // Asegurar renderizado dinámico
+
 // 📌 Generar Metadata Dinámica con SEO
 export async function generateMetadata(context) {
-  const params = await Promise.resolve(context.params);
-  const { slug } = params;
+  const { slug } = context.params;
 
   let metadata = {
     title: "Artículo no encontrado - Salud y Ser",
@@ -17,7 +18,7 @@ export async function generateMetadata(context) {
       description: "El artículo que buscas no está disponible.",
       type: "article",
       image: "/default-image.jpg",
-      url: `https://saludyser.com/articulos/${slug}`,
+      url: `${baseUrl}/articulos/${slug}`,
     },
   };
 
@@ -38,46 +39,40 @@ export async function generateMetadata(context) {
           description: articulo.meta_description || articulo.description || "Descubre más información útil.",
           type: "article",
           image: articulo.image || "/default-image.jpg",
-          url: `https://saludyser.com/articulos/${slug}`,
+          url: `${baseUrl}/articulos/${slug}`,
           article: {
             published_time: articulo.published_at || new Date().toISOString(),
             author: "Salud y Ser",
           },
         },
         alternates: {
-          canonical: `https://saludyser.com/articulos/${slug}`,
+          canonical: `${baseUrl}/articulos/${slug}`,
         },
         keywords: articulo.meta_keywords
           ? articulo.meta_keywords.split(",").map((kw) => kw.trim())
-          : [
-              articulo.category,
-              articulo.title,
-              "bienestar",
-              "salud",
-              "artículos de salud",
-            ],
+          : [articulo.category, articulo.title, "bienestar", "salud", "artículos de salud"],
         scripts: [
           {
             type: "application/ld+json",
             innerHTML: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Article",
-              "headline": articulo.title,
-              "image": articulo.image || "/default-image.jpg",
-              "author": {
+              headline: articulo.title,
+              image: articulo.image || "/default-image.jpg",
+              author: {
                 "@type": "Person",
-                "name": "Salud y Ser",
+                name: "Salud y Ser",
               },
-              "publisher": {
+              publisher: {
                 "@type": "Organization",
-                "name": "Salud y Ser",
-                "logo": {
+                name: "Salud y Ser",
+                logo: {
                   "@type": "ImageObject",
-                  "url": "https://saludyser.com/logo.jpg",
+                  url: `${baseUrl}/logo.jpg`,
                 },
               },
-              "datePublished": articulo.published_at || new Date().toISOString(),
-              "description": articulo.meta_description || articulo.description,
+              datePublished: articulo.published_at || new Date().toISOString(),
+              description: articulo.meta_description || articulo.description,
             }),
           },
         ],
@@ -92,15 +87,13 @@ export async function generateMetadata(context) {
 
 // 📌 Componente de Detalles de Artículo
 export default async function ArticuloDetallesPage(context) {
-  const params = await Promise.resolve(context.params);
-  const { slug } = params;
+  const { slug } = context.params;
 
   let articulo = null;
   let articulosRelacionados = [];
   let referencias = [];
 
   try {
-    // Obtener artículo y relacionados
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
       cache: "no-store",
     });
@@ -111,7 +104,6 @@ export default async function ArticuloDetallesPage(context) {
     articulo = data.articulo;
     articulosRelacionados = data.relacionados;
 
-    // Obtener referencias
     const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
       cache: "no-store",
     });
@@ -126,7 +118,6 @@ export default async function ArticuloDetallesPage(context) {
 
   return (
     <section className="bg-gray-50 min-h-screen py-10 mt-16">
-      {/* Volver al listado */}
       <div className="max-w-4xl mx-auto px-4">
         <Link
           href="/articulos"
@@ -137,7 +128,6 @@ export default async function ArticuloDetallesPage(context) {
         </Link>
       </div>
 
-      {/* Imagen principal */}
       {articulo?.image && (
         <div className="max-w-4xl mx-auto px-4 mt-6">
           <Image
@@ -151,38 +141,31 @@ export default async function ArticuloDetallesPage(context) {
         </div>
       )}
 
-      {/* Contenido principal del artículo */}
       <div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
-        {/* Contenido principal con Markdown */}
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
           <ReactMarkdown
             components={{
-              h2: ({ node, ...props }) => (
+              h2: ({ ...props }) => (
                 <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
               ),
-              h3: ({ node, ...props }) => (
+              h3: ({ ...props }) => (
                 <h3 className="text-xl font-medium text-gray-700 mt-6" {...props} />
               ),
-              blockquote: ({ node, ...props }) => (
+              blockquote: ({ ...props }) => (
                 <blockquote
                   className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4"
                   {...props}
                 />
               ),
-              ul: ({ node, ...props }) => (
-                <ul className="list-disc pl-6 space-y-2" {...props} />
-              ),
-              ol: ({ node, ...props }) => (
-                <ol className="list-decimal pl-6 space-y-2" {...props} />
-              ),
-              li: ({ node, ...props }) => <li className="mb-2" {...props} />,
+              ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+              ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+              li: ({ ...props }) => <li className="mb-2" {...props} />,
             }}
           >
             {articulo?.full_content || "Contenido no disponible."}
           </ReactMarkdown>
         </div>
 
-        {/* Fuentes o Referencias */}
         {referencias.length > 0 && (
           <div className="mt-10">
             <h2 className="text-xl font-bold text-gray-800 border-b border-gray-300 pb-2">
@@ -206,7 +189,6 @@ export default async function ArticuloDetallesPage(context) {
         )}
       </div>
 
-      {/* Artículos relacionados */}
       {articulosRelacionados.length > 0 ? (
         <div className="max-w-4xl mx-auto px-4 mt-10">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">

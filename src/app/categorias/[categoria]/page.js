@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/app/components/Pagination";
 
+// Capitalizar texto
 function capitalize(text) {
   if (!text) return "";
   return text
@@ -28,6 +29,8 @@ export default function CategoriaPage() {
   const [error, setError] = useState(null);
   const limit = 9;
 
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
+
   useEffect(() => {
     if (!categoria) {
       setError("Categoría no válida.");
@@ -41,7 +44,7 @@ export default function CategoriaPage() {
       try {
         const offset = (page - 1) * limit;
         const response = await fetch(
-          `http://localhost:3000/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
+          `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
           { signal: controller.signal, cache: "no-store" }
         );
 
@@ -64,7 +67,7 @@ export default function CategoriaPage() {
     fetchArticulos();
 
     return () => controller.abort();
-  }, [categoria, page]);
+  }, [categoria, page, baseUrl]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
