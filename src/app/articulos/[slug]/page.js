@@ -2,112 +2,85 @@ import ReactMarkdown from "react-markdown";
 import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
+
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export const dynamic = "force-dynamic"; // Asegurar renderizado dinámico
+// 📌 Generar rutas estáticas con `generateStaticParams`
+export async function generateStaticParams() {
+  try {
+    const response = await fetch(`${baseUrl}/api/articulos`);
+    if (!response.ok) throw new Error("Error al obtener los artículos.");
+    const data = await response.json();
 
-// 📌 Generar Metadata Dinámica con SEO
-export async function generateMetadata(context) {
-  const { slug } = context.params;
+    return data.data.map((articulo) => ({
+      slug: articulo.slug,
+    }));
+  } catch (error) {
+    console.error("Error al generar rutas estáticas:", error.message);
+    return [];
+  }
+}
 
-  let metadata = {
-    title: "Artículo no encontrado - Salud y Ser",
-    description: "El artículo que buscas no está disponible.",
-    openGraph: {
-      title: "Artículo no encontrado",
-      description: "El artículo que buscas no está disponible.",
-      type: "article",
-      image: "/default-image.jpg",
-      url: `${baseUrl}/articulos/${slug}`,
-    },
-  };
+// 📌 Generar metadatos dinámicos
+export async function generateMetadata({ params }) {
+  const { slug } = params;
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (response.ok) {
       const data = await response.json();
       const articulo = data.articulo;
 
-      metadata = {
+      return {
         title: `${articulo.title} | Salud y Ser`,
-        description: articulo.meta_description || articulo.description || "Lee más sobre este interesante tema.",
+        description:
+          articulo.meta_description || articulo.description || "Lee más sobre este interesante tema.",
         openGraph: {
           title: articulo.title,
-          description: articulo.meta_description || articulo.description || "Descubre más información útil.",
+          description:
+            articulo.meta_description || articulo.description || "Descubre más información útil.",
           type: "article",
           image: articulo.image || "/default-image.jpg",
           url: `${baseUrl}/articulos/${slug}`,
-          article: {
-            published_time: articulo.published_at || new Date().toISOString(),
-            author: "Salud y Ser",
-          },
         },
-        alternates: {
-          canonical: `${baseUrl}/articulos/${slug}`,
-        },
-        keywords: articulo.meta_keywords
-          ? articulo.meta_keywords.split(",").map((kw) => kw.trim())
-          : [articulo.category, articulo.title, "bienestar", "salud", "artículos de salud"],
-        scripts: [
-          {
-            type: "application/ld+json",
-            innerHTML: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Article",
-              headline: articulo.title,
-              image: articulo.image || "/default-image.jpg",
-              author: {
-                "@type": "Person",
-                name: "Salud y Ser",
-              },
-              publisher: {
-                "@type": "Organization",
-                name: "Salud y Ser",
-                logo: {
-                  "@type": "ImageObject",
-                  url: `${baseUrl}/logo.jpg`,
-                },
-              },
-              datePublished: articulo.published_at || new Date().toISOString(),
-              description: articulo.meta_description || articulo.description,
-            }),
-          },
-        ],
       };
     }
   } catch (error) {
-    console.error("Error al generar metadata dinámica:", error.message);
+    console.error("Error al generar metadatos:", error.message);
   }
 
-  return metadata;
+  return {
+    title: "Artículo no encontrado - Salud y Ser",
+    description: "El artículo que buscas no está disponible.",
+  };
 }
 
-// 📌 Componente de Detalles de Artículo
-export default async function ArticuloDetallesPage(context) {
-  const { slug } = context.params;
+// 📌 Página del artículo
+export default async function ArticuloDetallesPage({ params }) {
+  const { slug } = params;
 
   let articulo = null;
   let articulosRelacionados = [];
   let referencias = [];
 
   try {
+    // Obtener el artículo y sus datos relacionados
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
-
     if (!response.ok) throw new Error("No se encontró el artículo.");
     const data = await response.json();
 
     articulo = data.articulo;
-    articulosRelacionados = data.relacionados;
+    articulosRelacionados = data.relacionados || [];
 
+    // Obtener referencias del artículo
     const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
-      cache: "no-store",
+    next: { revalidate: 3600 },
     });
-
     if (refResponse.ok) {
       const refData = await refResponse.json();
       referencias = refData.references || [];
@@ -146,7 +119,10 @@ export default async function ArticuloDetallesPage(context) {
           <ReactMarkdown
             components={{
               h2: ({ ...props }) => (
-                <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+                <h2
+                  className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8"
+                  {...props}
+                />
               ),
               h3: ({ ...props }) => (
                 <h3 className="text-xl font-medium text-gray-700 mt-6" {...props} />

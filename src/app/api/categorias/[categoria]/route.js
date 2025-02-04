@@ -2,24 +2,30 @@ import { getConnection } from "../../../lib/db";
 
 export async function GET(request, context) {
   let connection;
-  try {
-    // Resolver context.params de forma asíncrona
-    const params = await Promise.resolve(context.params);
-    const categoria = params.categoria;
 
-    if (!categoria) {
-      return new Response(JSON.stringify({ error: "Categoría no proporcionada." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+  try {
+    // Resolver el parámetro `categoria`
+    const { categoria } = context.params;
+
+    // Validar el parámetro `categoria`
+    if (!categoria || typeof categoria !== "string" || categoria.trim() === "") {
+      return new Response(
+        JSON.stringify({ error: "Categoría no válida o no proporcionada." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     connection = await getConnection();
 
-    // Normalizar el slug de la categoría para comparación en la base de datos
-    const categoriaNombre = decodeURIComponent(categoria).replace(/-/g, " ").toLowerCase();
+    // Normalizar el slug de la categoría para búsqueda
+    const categoriaNombre = decodeURIComponent(categoria)
+      .replace(/-/g, " ")
+      .toLowerCase();
 
-    // Buscar datos de la categoría en la base de datos
+    // Consultar la base de datos para la categoría
     const [rows] = await connection.query(
       `SELECT 
          category AS name, 
@@ -34,21 +40,32 @@ export async function GET(request, context) {
     if (rows.length === 0) {
       return new Response(
         JSON.stringify({ error: "Categoría no encontrada." }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
     const data = rows[0];
 
+    // Respuesta exitosa con datos
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599", // Cache por 1 hora
+      },
     });
   } catch (error) {
-    console.error("Error al obtener datos de la categoría:", error.message);
+    console.error("Error al obtener datos de la categoría:", error.message, error.stack);
+
     return new Response(
       JSON.stringify({ error: "Error interno del servidor." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   } finally {
     if (connection) connection.release();

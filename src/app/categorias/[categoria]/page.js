@@ -1,7 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/app/components/Pagination";
@@ -16,69 +12,68 @@ function capitalize(text) {
     .join(" ");
 }
 
-export default function CategoriaPage() {
-  const { categoria: categoriaSlug } = useParams();
-  const categoria = categoriaSlug
-    ? capitalize(decodeURIComponent(categoriaSlug.replace(/-/g, " ")))
-    : null;
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
+const limit = 9;
 
-  const [articulos, setArticulos] = useState([]);
-  const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const limit = 9;
+// 📌 Generar rutas estáticas con `generateStaticParams`
+export async function generateStaticParams() {
+  try {
+    const response = await fetch(`${baseUrl}/api/categorias`, { next: { revalidate: 3600 }});
+    if (!response.ok) throw new Error("Error al obtener categorías.");
+    const data = await response.json();
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
+    return data.map((categoria) => ({
+      categoria: categoria.slug,
+    }));
+  } catch (error) {
+    console.error("Error al generar rutas estáticas:", error.message);
+    return [];
+  }
+}
 
-  useEffect(() => {
-    if (!categoria) {
-      setError("Categoría no válida.");
-      return;
-    }
+// 📌 Generar metadatos dinámicos
+export async function generateMetadata({ params }) {
+  const categoriaSlug = params.categoria;
+  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
 
-    const controller = new AbortController();
-    const fetchArticulos = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const offset = (page - 1) * limit;
-        const response = await fetch(
-          `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
-          { signal: controller.signal, cache: "no-store" }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error al obtener artículos: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setArticulos(data.data || []);
-        setPages(Math.ceil(data.total / limit));
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          setError(error.message);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchArticulos();
-
-    return () => controller.abort();
-  }, [categoria, page, baseUrl]);
-
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
+  return {
+    title: `Artículos sobre ${categoria} | Saludyser`,
+    description: `Explora artículos destacados sobre ${categoria} en Saludyser.`,
   };
+}
+
+// 📌 Página de categoría
+export default async function CategoriaPage({ params, searchParams }) {
+  const categoriaSlug = params.categoria;
+  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+  const offset = (page - 1) * limit;
+
+  let articulos = [];
+  let total = 0;
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!response.ok) throw new Error("Error al obtener artículos.");
+
+    const data = await response.json();
+    articulos = data.data || [];
+    total = data.total || 0;
+  } catch (error) {
+    console.error("Error al obtener artículos para la categoría:", error.message);
+  }
+
+  const pages = Math.ceil(total / limit);
 
   return (
     <div className="container mx-auto px-6 py-12">
       {categoria ? (
         <>
           <h1 className="text-4xl font-bold text-gray-800 mb-8">
-            Artículos sobre {categoria}
+            Artículos sobre {capitalize(categoria)}
           </h1>
           <Link
             href="/articulos"
@@ -91,11 +86,7 @@ export default function CategoriaPage() {
         <h1 className="text-4xl font-bold text-gray-800 mb-8">Categoría no válida</h1>
       )}
 
-      {isLoading ? (
-        <p className="text-center text-gray-600">Cargando artículos...</p>
-      ) : error ? (
-        <p className="text-center text-red-600">{error}</p>
-      ) : articulos.length > 0 ? (
+      {articulos.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {articulos.map((articulo) => (
@@ -126,7 +117,15 @@ export default function CategoriaPage() {
           </div>
 
           <div className="mt-8">
-            <Pagination page={page} pages={pages} onPageChange={handlePageChange} />
+            <Pagination
+              page={page}
+              pages={pages}
+              onPageChange={(newPage) =>
+                window.location.assign(
+                  `/categorias/${categoriaSlug}?page=${newPage}`
+                )
+              }
+            />
           </div>
         </>
       ) : (

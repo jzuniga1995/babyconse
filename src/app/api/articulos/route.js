@@ -10,36 +10,42 @@ export async function GET(request) {
 
     const url = new URL(request.url);
     const category = url.searchParams.get("category");
-    const limit = parseInt(url.searchParams.get("limit"), 10) || 10;
-    const offset = parseInt(url.searchParams.get("offset"), 10) || 0;
+    const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit"), 10) || 10, 1), 100);
+    const offset = Math.max(parseInt(url.searchParams.get("offset"), 10) || 0, 0);
 
-    // Construir la consulta SQL
     let query = `
-      SELECT SQL_CALC_FOUND_ROWS 
+      SELECT 
         id, title, slug, description, image, category, 
         meta_keywords, meta_description, full_content, published_at, views
       FROM articulos
     `;
+    let countQuery = `SELECT COUNT(*) as total FROM articulos`;
     const queryParams = [];
 
     if (category) {
       query += " WHERE category = ?";
+      countQuery += " WHERE category = ?";
       queryParams.push(category);
     }
 
     query += " LIMIT ?, ?";
     queryParams.push(offset, limit);
 
-    // Ejecutar consultas
     const [rows] = await connection.query(query, queryParams);
-    const [totalRows] = await connection.query("SELECT FOUND_ROWS() as total");
+    const [totalRows] = await connection.query(countQuery, queryParams);
 
     return new Response(
-      JSON.stringify({ data: rows, total: totalRows[0].total }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ data: rows, total: totalRows[0]?.total || 0 }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599",
+        },
+      }
     );
   } catch (error) {
-    console.error("Error al obtener los artículos:", error);
+    console.error("Error al obtener los artículos:", error.message, error.stack);
     return new Response(
       JSON.stringify({ error: "Error interno del servidor." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
@@ -67,7 +73,6 @@ export async function POST(request) {
       referencias,
     } = body;
 
-    // Validar campos obligatorios
     if (!title || !description || !category || !full_content) {
       return new Response(
         JSON.stringify({
@@ -81,7 +86,6 @@ export async function POST(request) {
 
     connection = await getConnection();
 
-    // Verificar slug duplicado
     const [existingSlug] = await connection.query(
       "SELECT id FROM articulos WHERE slug = ?",
       [slug]
@@ -94,7 +98,6 @@ export async function POST(request) {
       );
     }
 
-    // Insertar el artículo
     const [result] = await connection.query(
       `INSERT INTO articulos (
         title, description, link, image, category, full_content, slug, 
@@ -115,7 +118,6 @@ export async function POST(request) {
 
     const articuloId = result.insertId;
 
-    // Insertar referencias
     if (Array.isArray(referencias) && referencias.length > 0) {
       const referenciaQueries = referencias.map((ref) => [
         articuloId,
@@ -131,10 +133,16 @@ export async function POST(request) {
 
     return new Response(
       JSON.stringify({ message: "Artículo creado con éxito", id: articuloId, slug }),
-      { status: 201, headers: { "Content-Type": "application/json" } }
+      {
+        status: 201,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      }
     );
   } catch (error) {
-    console.error("Error al crear el artículo:", error);
+    console.error("Error al crear el artículo:", error.message, error.stack);
     return new Response(
       JSON.stringify({ error: "Error al crear el artículo." }),
       { status: 500, headers: { "Content-Type": "application/json" } }

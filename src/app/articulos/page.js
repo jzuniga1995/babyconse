@@ -1,9 +1,7 @@
 import MenuCategorias from "../components/MenuCategorias"; // Importar el componente correcto
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export const dynamic = "force-dynamic"; // Asegurar renderizado dinámico
-
-// Metadata dinámica
+// 📌 Generar metadatos dinámicos
 export async function generateMetadata() {
   let metadata = {
     title: "Categorías de Salud y Bienestar | Artículos - Salud y Ser",
@@ -34,18 +32,18 @@ export async function generateMetadata() {
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
-
     if (!response.ok) {
       throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
+    const articulos = Array.isArray(data.data) ? data.data : [];
 
-    if (Array.isArray(data.data)) {
+    if (articulos.length > 0) {
       const categorias = Array.from(
-        new Set(data.data.map((articulo) => articulo.category))
+        new Set(articulos.map((articulo) => articulo.category).filter(Boolean))
       );
 
       metadata = {
@@ -67,19 +65,19 @@ export async function generateMetadata() {
         innerHTML: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "Categorías de Artículos sobre Salud y Bienestar",
-          "description": metadata.description,
-          "publisher": {
+          name: "Categorías de Artículos sobre Salud y Bienestar",
+          description: metadata.description,
+          publisher: {
             "@type": "Organization",
-            "name": "SaludySer",
-            "logo": {
+            name: "SaludySer",
+            logo: {
               "@type": "ImageObject",
-              "url": `${baseUrl}/logo.jpg`,
+              url: `${baseUrl}/logo.jpg`,
             },
           },
-          "mainEntity": categorias.map((categoria) => ({
+          mainEntity: categorias.map((categoria) => ({
             "@type": "Category",
-            "name": categoria,
+            name: categoria,
           })),
         }),
       });
@@ -91,17 +89,15 @@ export async function generateMetadata() {
   return metadata;
 }
 
-// 📌 Página principal de artículos
+// 📌 Página principal
 export default async function ArticulosPage() {
   let articulos = [];
+
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error("Error al obtener los artículos.");
 
     const data = await response.json();
     articulos = Array.isArray(data.data) ? data.data : [];
@@ -112,12 +108,12 @@ export default async function ArticulosPage() {
   return (
     <section className="bg-gray-50 min-h-screen mt-16">
       <h1 className="text-5xl font-extrabold text-center text-gray-800 py-8">
-        Categorías de Artículos sobre Salud y Bienestar
+        Categorías de Artículos sobre Salud, Nutrición y Bienestar
       </h1>
       <p className="text-center text-gray-600 mb-8 text-lg px-4">
         Explora una variedad de categorías relacionadas con el bienestar físico,
-        mental y emocional. Aprende más sobre nutrición, ejercicio, salud
-        mental, y prevención médica.
+        mental y emocional. Aprende sobre nutrición, ejercicio, salud mental,
+        prevención médica y más temas esenciales para tu calidad de vida.
       </p>
       {articulos.length > 0 ? (
         <MenuCategorias

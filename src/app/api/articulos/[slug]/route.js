@@ -4,15 +4,17 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    // Extraer `params` de forma segura
-    const params = await Promise.resolve(context.params);
-    const { slug } = params;
+    // Extraer `slug` de los parámetros
+    const { slug } = context.params;
 
     if (!slug) {
-      return new Response(JSON.stringify({ error: "Slug no proporcionado." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Slug no proporcionado." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     connection = await getConnection();
@@ -34,10 +36,13 @@ export async function GET(request, context) {
     );
 
     if (rows.length === 0) {
-      return new Response(JSON.stringify({ error: "Artículo no encontrado." }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Artículo no encontrado." }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     const articulo = rows[0];
@@ -60,19 +65,30 @@ export async function GET(request, context) {
       [articulo.category, slug]
     );
 
+    // Respuesta con datos y encabezados de caché
     return new Response(
       JSON.stringify({
         articulo,
-        referencias: referencias || [], // Asegurar siempre un arreglo
-        relacionados,
+        referencias: referencias || [], // Asegurar que sea un arreglo
+        relacionados: relacionados || [], // Asegurar que sea un arreglo
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599", // Cache por 1 hora
+        },
+      }
     );
   } catch (error) {
     console.error("Error al obtener el artículo:", error);
+
     return new Response(
       JSON.stringify({ error: "Error interno del servidor." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   } finally {
     if (connection) connection.release();

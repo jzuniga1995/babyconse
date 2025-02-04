@@ -9,7 +9,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variable
 async function fetchArticulos() {
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
