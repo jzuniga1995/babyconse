@@ -1,6 +1,14 @@
+"use client"; // Asegura que el componente sea un Client Component
+
 import { useMemo } from "react";
+import PropTypes from "prop-types";
 
 export default function Pagination({ page, pages, onPageChange }) {
+  if (typeof onPageChange !== "function") {
+    console.error("Propiedad `onPageChange` no está definida o no es una función.");
+    return null; // Evita renderizar el componente si onPageChange no es válido
+  }
+
   const handlePrevious = () => {
     if (page > 1) onPageChange(page - 1);
   };
@@ -10,6 +18,8 @@ export default function Pagination({ page, pages, onPageChange }) {
   };
 
   const renderPageNumbers = useMemo(() => {
+    if (pages <= 0) return null; // Evita renderizar si no hay páginas
+
     const visiblePages = 5; // Máximo número de páginas visibles
     const startPage = Math.max(1, page - Math.floor(visiblePages / 2));
     const endPage = Math.min(pages, startPage + visiblePages - 1);
@@ -26,7 +36,7 @@ export default function Pagination({ page, pages, onPageChange }) {
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
           aria-current={page === pageNumber ? "page" : undefined}
-          aria-label={`Página ${pageNumber}`}
+          aria-label={`Ir a la página ${pageNumber}`}
         >
           {pageNumber}
         </button>
@@ -48,6 +58,7 @@ export default function Pagination({ page, pages, onPageChange }) {
             ? "bg-blue-500 text-white hover:bg-blue-600"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
+        aria-disabled={page <= 1}
         aria-label="Página anterior"
       >
         ⬅️ Anterior
@@ -65,6 +76,7 @@ export default function Pagination({ page, pages, onPageChange }) {
             ? "bg-blue-500 text-white hover:bg-blue-600"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
+        aria-disabled={page >= pages}
         aria-label="Página siguiente"
       >
         Siguiente ➡️
@@ -72,3 +84,9 @@ export default function Pagination({ page, pages, onPageChange }) {
     </nav>
   );
 }
+
+Pagination.propTypes = {
+  page: PropTypes.number.isRequired,
+  pages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+};
