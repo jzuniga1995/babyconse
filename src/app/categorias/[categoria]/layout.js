@@ -81,32 +81,9 @@ export async function generateMetadata({ params }) {
 }
 
 // 📌 Layout de Categorías
-export default async function CategoriaLayout({ children, params }) {
-  const { categoria: categoriaSlug } = params;
-  let categoria = null;
-
-  try {
-    const response = await fetch(`${baseUrl}/api/categorias/${categoriaSlug}`, {
-      next: { revalidate: 3600 },
-    });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-
-    categoria = await response.json();
-  } catch (error) {
-    console.error(`Error al obtener datos para la categoría: ${categoriaSlug}`, error.message);
-  }
-
+export default function CategoriaLayout({ children }) {
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {categoria ? (
-          <h1 className="text-4xl font-bold text-gray-800 mb-6 capitalize">
-            {categoria.name}
-          </h1>
-        ) : (
-          <h1 className="text-4xl font-bold text-red-600 mb-6">Categoría no encontrada</h1>
-        )}
-      </div>
       <section className="max-w-6xl mx-auto px-4 py-8">{children}</section>
     </main>
   );
