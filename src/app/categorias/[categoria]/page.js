@@ -5,36 +5,6 @@ import PaginationWrapper from "@/app/components/PaginationWrapper";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
 const limit = 9;
 
-// 📌 Generar rutas estáticas con `generateStaticParams`
-export async function generateStaticParams() {
-  try {
-    const response = await fetch(`${baseUrl}/api/categorias`, { next: { revalidate: 3600 } });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-
-    const data = await response.json();
-
-    return Array.isArray(data)
-      ? data.map((categoria) => ({
-          categoria: categoria.slug,
-        }))
-      : [];
-  } catch (error) {
-    console.error("Error al generar rutas estáticas:", error.message);
-    return []; // Retornar un array vacío para evitar errores en el build
-  }
-}
-
-// 📌 Generar metadatos dinámicos
-export async function generateMetadata({ params }) {
-  const categoriaSlug = params.categoria;
-  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
-
-  return {
-    title: `Artículos sobre ${categoria} | Saludyser`,
-    description: `Explora artículos destacados sobre ${categoria} en Saludyser.`,
-  };
-}
-
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
   const categoriaSlug = params.categoria;
@@ -63,6 +33,12 @@ export default async function CategoriaPage({ params, searchParams }) {
 
   return (
     <div className="container mx-auto px-6 py-12">
+      {/* Título dinámico de la categoría */}
+      <h1 className="text-4xl font-bold text-gray-800 mb-8 capitalize text-center">
+        {categoria}
+      </h1>
+
+      {/* Grid de artículos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {articulos.length > 0 ? (
           articulos.map((articulo) => (
@@ -97,6 +73,7 @@ export default async function CategoriaPage({ params, searchParams }) {
         )}
       </div>
 
+      {/* Paginación */}
       <div className="mt-8">
         <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
       </div>

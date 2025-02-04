@@ -100,9 +100,9 @@ export default async function CategoriaLayout({ children, params }) {
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {categoria ? (
-          <>
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">{categoria.name}</h1>
-          </>
+          <h1 className="text-4xl font-bold text-gray-800 mb-6 capitalize">
+            {categoria.name}
+          </h1>
         ) : (
           <h1 className="text-4xl font-bold text-red-600 mb-6">Categoría no encontrada</h1>
         )}
