@@ -8,7 +8,9 @@ const limit = 9;
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
   const categoriaSlug = params.categoria;
-  const categoria = categoriaSlug ? decodeURIComponent(categoriaSlug.replace(/-/g, " ")) : "Categoría no válida";
+  const categoria = categoriaSlug
+    ? decodeURIComponent(categoriaSlug.replace(/-/g, " "))
+    : "Categoría no válida";
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
@@ -32,9 +34,9 @@ export default async function CategoriaPage({ params, searchParams }) {
   const pages = total > 0 ? Math.ceil(total / limit) : 0;
 
   return (
-    <div className="container mx-auto px-6 py-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-16">
       {/* Título dinámico de la categoría */}
-      <h1 className="text-4xl font-bold text-gray-800 mb-8 capitalize text-center">
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 capitalize text-center">
         {categoria}
       </h1>
 
@@ -74,7 +76,7 @@ export default async function CategoriaPage({ params, searchParams }) {
       </div>
 
       {/* Paginación */}
-      <div className="mt-8">
+      <div className="flex justify-center mt-16">
         <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
       </div>
     </div>

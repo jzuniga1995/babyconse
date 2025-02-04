@@ -30,7 +30,7 @@ export default function Pagination({ page, pages, onPageChange }) {
         <button
           key={pageNumber}
           onClick={() => onPageChange(pageNumber)}
-          className={`px-4 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ${
+          className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
             page === pageNumber
               ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -46,14 +46,14 @@ export default function Pagination({ page, pages, onPageChange }) {
 
   return (
     <nav
-      className="flex justify-center items-center mt-8 space-x-2"
+      className="flex flex-wrap justify-center items-center mt-8 gap-3"
       aria-label="Paginación"
     >
       {/* Botón Anterior */}
       <button
         onClick={handlePrevious}
         disabled={page <= 1}
-        className={`px-4 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ${
+        className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
           page > 1
             ? "bg-blue-500 text-white hover:bg-blue-600"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -71,7 +71,7 @@ export default function Pagination({ page, pages, onPageChange }) {
       <button
         onClick={handleNext}
         disabled={page >= pages}
-        className={`px-4 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ${
+        className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
           page < pages
             ? "bg-blue-500 text-white hover:bg-blue-600"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
