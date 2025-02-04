@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // 📌 Generar Metadata Dinámica con SEO
 export async function generateMetadata(context) {
@@ -16,12 +17,12 @@ export async function generateMetadata(context) {
       description: "El artículo que buscas no está disponible.",
       type: "article",
       image: "/default-image.jpg",
-      url: `https://tusitio.com/articulos/${slug}`,
+      url: `https://saludyser.com/articulos/${slug}`,
     },
   };
 
   try {
-    const response = await fetch(`http://localhost:3000/api/articulos/${slug}`, {
+    const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
       cache: "no-store",
     });
 
@@ -37,14 +38,14 @@ export async function generateMetadata(context) {
           description: articulo.meta_description || articulo.description || "Descubre más información útil.",
           type: "article",
           image: articulo.image || "/default-image.jpg",
-          url: `https://tusitio.com/articulos/${slug}`,
+          url: `https://saludyser.com/articulos/${slug}`,
           article: {
             published_time: articulo.published_at || new Date().toISOString(),
             author: "Salud y Ser",
           },
         },
         alternates: {
-          canonical: `https://tusitio.com/articulos/${slug}`,
+          canonical: `https://saludyser.com/articulos/${slug}`,
         },
         keywords: articulo.meta_keywords
           ? articulo.meta_keywords.split(",").map((kw) => kw.trim())
@@ -72,7 +73,7 @@ export async function generateMetadata(context) {
                 "name": "Salud y Ser",
                 "logo": {
                   "@type": "ImageObject",
-                  "url": "https://tusitio.com/logo.jpg",
+                  "url": "https://saludyser.com/logo.jpg",
                 },
               },
               "datePublished": articulo.published_at || new Date().toISOString(),
@@ -100,7 +101,7 @@ export default async function ArticuloDetallesPage(context) {
 
   try {
     // Obtener artículo y relacionados
-    const response = await fetch(`http://localhost:3000/api/articulos/${slug}`, {
+    const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
       cache: "no-store",
     });
 
@@ -111,7 +112,7 @@ export default async function ArticuloDetallesPage(context) {
     articulosRelacionados = data.relacionados;
 
     // Obtener referencias
-    const refResponse = await fetch(`http://localhost:3000/api/articulo_referencias/${articulo.id}`, {
+    const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
       cache: "no-store",
     });
 

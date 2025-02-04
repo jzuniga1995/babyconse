@@ -1,4 +1,5 @@
 import MenuCategorias from "../components/MenuCategorias"; // Importar el componente correcto
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Metadata dinámica
 export async function generateMetadata() {
@@ -13,10 +14,10 @@ export async function generateMetadata() {
       description:
         "Explora una variedad de categorías y artículos sobre salud y bienestar. Aprende más sobre nutrición, ejercicio, prevención médica, y cómo vivir una vida más saludable.",
       type: "website",
-      url: "https://tu-sitio.com/articulos",
+      url: "https://saludyser.com/articulos",
       images: [
         {
-          url: "https://tu-sitio.com/images/og-articulos.jpg",
+          url: "https://saludyser/images/og-articulos.jpg",
           alt: "Categorías de Salud y Bienestar - Salud y Ser",
           width: 1200,
           height: 630,
@@ -24,13 +25,13 @@ export async function generateMetadata() {
       ],
     },
     alternates: {
-      canonical: "https://tu-sitio.com/articulos",
+      canonical: "https://saludyser.com/articulos",
     },
     scripts: [], // Agregar datos estructurados
   };
 
   try {
-    const response = await fetch("http://localhost:3000/api/articulos", {
+    const response = await fetch(`${baseUrl}/api/articulos`, {
       cache: "no-store",
     });
 
@@ -71,7 +72,7 @@ export async function generateMetadata() {
               "name": "SaludySer",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://tu-sitio.com/logo.jpg",
+                "url": "https://saludyser.com/logo.jpg",
               },
             },
             "mainEntity": categorias.map((categoria) => ({
@@ -95,7 +96,7 @@ export async function generateMetadata() {
 export default async function ArticulosPage() {
   let articulos = [];
   try {
-    const response = await fetch("http://localhost:3000/api/articulos", {
+    const response = await fetch(`${baseUrl}/api/articulos`, {
       cache: "no-store",
     });
     if (response.ok) {
