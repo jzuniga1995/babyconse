@@ -18,16 +18,19 @@ const limit = 9;
 // 📌 Generar rutas estáticas con `generateStaticParams`
 export async function generateStaticParams() {
   try {
-    const response = await fetch(`${baseUrl}/api/categorias`, { next: { revalidate: 3600 }});
-    if (!response.ok) throw new Error("Error al obtener categorías.");
+    const response = await fetch(`${baseUrl}/api/categorias`, { next: { revalidate: 3600 } });
+    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
     const data = await response.json();
 
-    return data.map((categoria) => ({
-      categoria: categoria.slug,
-    }));
+    return Array.isArray(data)
+      ? data.map((categoria) => ({
+          categoria: categoria.slug,
+        }))
+      : [];
   } catch (error) {
     console.error("Error al generar rutas estáticas:", error.message);
-    return [];
+    return []; // Retornar un array vacío para evitar errores en el build
   }
 }
 
@@ -57,10 +60,10 @@ export default async function CategoriaPage({ params, searchParams }) {
       `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
       { next: { revalidate: 3600 } }
     );
-    if (!response.ok) throw new Error("Error al obtener artículos.");
+    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
     const data = await response.json();
-    articulos = data.data || [];
+    articulos = Array.isArray(data.data) ? data.data : [];
     total = data.total || 0;
   } catch (error) {
     console.error("Error al obtener artículos para la categoría:", error.message);
