@@ -29,13 +29,10 @@ export async function GET() {
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
     const categoriesData = await categoriesRes.json();
 
-    // Manejo directo de categorías (sin `data`)
-    if (categoriesData) {
-      categories = Object.entries(categoriesData).map(([slug, category]) => ({
-        slug,
-        name: category.name,
-      }));
-    }
+    // Asegúrate de que categoriesData tenga un formato consistente
+    categories = Array.isArray(categoriesData)
+      ? categoriesData // Ya es un array
+      : Object.values(categoriesData); // Convierte el objeto en un array de valores
   } catch (error) {
     console.error("Error al cargar categorías:", error.message);
   }
