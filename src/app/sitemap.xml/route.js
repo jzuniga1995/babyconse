@@ -13,6 +13,16 @@ export async function GET() {
   let articles = [];
   let categories = [];
 
+  // Función para normalizar slugs
+  function normalizeSlug(text) {
+    return text
+      .toLowerCase() // Convertir a minúsculas
+      .normalize("NFD") // Eliminar tildes y diacríticos
+      .replace(/[\u0300-\u036f]/g, "") // Remover acentos
+      .replace(/\s+/g, "-") // Reemplazar espacios por guiones
+      .replace(/[^\w\-]+/g, ""); // Eliminar caracteres especiales
+  }
+
   // Obtener datos dinámicos de artículos
   try {
     const articlesRes = await fetch("https://www.saludyser.com/api/articulos");
@@ -29,10 +39,10 @@ export async function GET() {
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
     const categoriesData = await categoriesRes.json();
 
-    // Asegúrate de que categoriesData tenga un formato consistente
+    // Convertir el objeto en un array si es necesario
     categories = Array.isArray(categoriesData)
-      ? categoriesData // Ya es un array
-      : Object.values(categoriesData); // Convierte el objeto en un array de valores
+      ? categoriesData
+      : Object.values(categoriesData);
   } catch (error) {
     console.error("Error al cargar categorías:", error.message);
   }
@@ -52,7 +62,7 @@ export async function GET() {
     ? categories
         .filter((category) => category.slug) // Filtrar categorías sin slug
         .map((category) => ({
-          url: `https://www.saludyser.com/categorias/${encodeURIComponent(category.slug)}`,
+          url: `https://www.saludyser.com/categorias/${normalizeSlug(category.slug)}`,
           lastModified: new Date().toISOString(),
         }))
     : [];
