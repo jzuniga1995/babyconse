@@ -23,7 +23,8 @@ export async function generateStaticParams() {
 
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const resolvedParams = await params; // Resolver params como promesa
+  const { slug } = resolvedParams;
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -60,7 +61,8 @@ export async function generateMetadata({ params }) {
 
 // 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {
-  const { slug } = params;
+  const resolvedParams = await params; // Resolver params como promesa
+  const { slug } = resolvedParams;
 
   let articulo = null;
   let articulosRelacionados = [];
@@ -79,7 +81,7 @@ export default async function ArticuloDetallesPage({ params }) {
 
     // Obtener referencias del artículo
     const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
-    next: { revalidate: 3600 },
+      next: { revalidate: 3600 },
     });
     if (refResponse.ok) {
       const refData = await refResponse.json();

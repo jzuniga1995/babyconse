@@ -4,7 +4,9 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    const { id } = context.params;
+    // 🔴 Resolver `context.params` como una promesa
+    const resolvedParams = await context.params; // Resolver la promesa de params
+    const { id } = resolvedParams; // Extraer `id` de los parámetros resueltos
 
     // Validar que el ID es un número entero positivo
     if (!id || isNaN(parseInt(id, 10)) || parseInt(id, 10) <= 0) {

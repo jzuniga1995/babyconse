@@ -21,7 +21,8 @@ export async function generateStaticParams() {
 
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const { categoria: categoriaSlug } = params;
+  const resolvedParams = await params; // Resuelve la promesa de params
+  const { categoria: categoriaSlug } = resolvedParams;
   const categoriaNombre = decodeURIComponent(categoriaSlug.replace(/-/g, " ")).toLowerCase();
 
   let metadata = {
@@ -79,6 +80,7 @@ export async function generateMetadata({ params }) {
 
   return metadata;
 }
+
 
 // 📌 Layout de Categorías
 export default function CategoriaLayout({ children }) {

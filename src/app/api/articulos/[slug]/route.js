@@ -4,8 +4,9 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    // Extraer `slug` de los parámetros
-    const { slug } = context.params;
+    // 🔴 Resolver `context.params` como una promesa
+    const resolvedParams = await context.params; // Resolver la promesa
+    const { slug } = resolvedParams; // Extraer `slug` de los parámetros resueltos
 
     if (!slug) {
       return new Response(
