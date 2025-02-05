@@ -7,16 +7,10 @@ const limit = 9;
 
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
-  // Resolver params y searchParams correctamente
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
+  const categoriaSlug = params?.categoria || "";
+  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
 
-  const categoriaSlug = resolvedParams.categoria;
-  const categoria = categoriaSlug
-    ? decodeURIComponent(categoriaSlug.replace(/-/g, " "))
-    : "Categoría no válida";
-
-  const page = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
   let articulos = [];
@@ -38,8 +32,29 @@ export default async function CategoriaPage({ params, searchParams }) {
 
   const pages = total > 0 ? Math.ceil(total / limit) : 0;
 
+  // JSON-LD para datos estructurados
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `Artículos sobre ${categoria}`,
+    description: `Explora los mejores artículos sobre ${categoria} en Saludyser.`,
+    mainEntity: articulos.map((articulo) => ({
+      "@type": "Article",
+      headline: articulo.title,
+      description: articulo.description || "Descripción no disponible.",
+      image: articulo.image || "/images/default.jpg",
+      url: `${baseUrl}/articulos/${articulo.slug}`,
+    })),
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-16">
+      {/* Datos estructurados */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       {/* Título dinámico de la categoría */}
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 capitalize text-center">
         {categoria}
@@ -57,7 +72,7 @@ export default async function CategoriaPage({ params, searchParams }) {
               <div className="relative w-full h-48">
                 <Image
                   src={articulo.image || "/images/default.jpg"} // Si no hay imagen, usa una predeterminada
-                  alt={`Imagen del artículo ${articulo.title || "sin título"}`}
+                  alt={`Imagen del artículo: ${articulo.title}`}
                   layout="fill"
                   objectFit="cover"
                   className="rounded-t-lg"
@@ -82,7 +97,9 @@ export default async function CategoriaPage({ params, searchParams }) {
 
       {/* Paginación */}
       <div className="flex justify-center mt-16">
-        <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
+        {pages > 1 && (
+          <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
+        )}
       </div>
     </div>
   );

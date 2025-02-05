@@ -23,8 +23,7 @@ export async function generateStaticParams() {
 
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const resolvedParams = await params; // Resolver params como promesa
-  const { slug } = resolvedParams;
+  const { slug } = params;
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -39,6 +38,7 @@ export async function generateMetadata({ params }) {
         title: `${articulo.title} | Salud y Ser`,
         description:
           articulo.meta_description || articulo.description || "Lee más sobre este interesante tema.",
+        keywords: articulo.meta_keywords || "salud, bienestar, nutrición",
         openGraph: {
           title: articulo.title,
           description:
@@ -46,6 +46,12 @@ export async function generateMetadata({ params }) {
           type: "article",
           image: articulo.image || "/default-image.jpg",
           url: `${baseUrl}/articulos/${slug}`,
+          article: {
+            publishedTime: articulo.published_at,
+            modifiedTime: articulo.updated_at,
+            section: articulo.category,
+            tags: articulo.meta_keywords ? articulo.meta_keywords.split(",") : [],
+          },
         },
       };
     }
@@ -61,15 +67,13 @@ export async function generateMetadata({ params }) {
 
 // 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {
-  const resolvedParams = await params; // Resolver params como promesa
-  const { slug } = resolvedParams;
+  const { slug } = params;
 
   let articulo = null;
   let articulosRelacionados = [];
   let referencias = [];
 
   try {
-    // Obtener el artículo y sus datos relacionados
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
       next: { revalidate: 3600 },
     });
@@ -90,6 +94,26 @@ export default async function ArticuloDetallesPage({ params }) {
   } catch (error) {
     console.error("Error al obtener los datos:", error.message);
   }
+
+  const structuredData = articulo
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: articulo.title,
+        description: articulo.meta_description || articulo.description,
+        image: articulo.image || "/default-image.jpg",
+        author: {
+          "@type": "Person",
+          name: "Salud y Ser",
+        },
+        datePublished: articulo.published_at,
+        dateModified: articulo.updated_at,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": `${baseUrl}/articulos/${slug}`,
+        },
+      }
+    : null;
 
   return (
     <section className="bg-gray-50 min-h-screen py-10 mt-16">
@@ -116,35 +140,34 @@ export default async function ArticuloDetallesPage({ params }) {
         </div>
       )}
 
-<div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
-  <h1 className="text-3xl font-bold text-gray-800">{articulo?.title || "Título no disponible"}</h1>
-  <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
-    <ReactMarkdown
-      components={{
-        h2: ({ ...props }) => (
-          <h2
-            className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8"
-            {...props}
-          />
-        ),
-        h3: ({ ...props }) => (
-          <h3 className="text-xl font-medium text-gray-700 mt-6" {...props} />
-        ),
-        blockquote: ({ ...props }) => (
-          <blockquote
-            className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4"
-            {...props}
-          />
-        ),
-        ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
-        ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-        li: ({ ...props }) => <li className="mb-2" {...props} />,
-      }}
-    >
-      {articulo?.full_content || "Contenido no disponible."}
-    </ReactMarkdown>
-  </div>
-
+      <div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-gray-800">{articulo?.title || "Título no disponible"}</h1>
+        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
+          <ReactMarkdown
+            components={{
+              h2: ({ ...props }) => (
+                <h2
+                  className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8"
+                  {...props}
+                />
+              ),
+              h3: ({ ...props }) => (
+                <h3 className="text-xl font-medium text-gray-700 mt-6" {...props} />
+              ),
+              blockquote: ({ ...props }) => (
+                <blockquote
+                  className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4"
+                  {...props}
+                />
+              ),
+              ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+              ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+              li: ({ ...props }) => <li className="mb-2" {...props} />,
+            }}
+          >
+            {articulo?.full_content || "Contenido no disponible."}
+          </ReactMarkdown>
+        </div>
 
         {referencias.length > 0 && (
           <div className="mt-10">
@@ -202,6 +225,14 @@ export default async function ArticuloDetallesPage({ params }) {
         <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
           <p className="text-gray-600">No se encontraron artículos relacionados.</p>
         </div>
+      )}
+
+      {/* Incluir datos estructurados */}
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
       )}
     </section>
   );

@@ -1,4 +1,4 @@
-import MenuCategorias from "../components/MenuCategorias"; // Importar el componente correcto
+import MenuCategorias from "../components/MenuCategorias";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // 📌 Generar metadatos dinámicos
@@ -27,16 +27,13 @@ export async function generateMetadata() {
     alternates: {
       canonical: `${baseUrl}/articulos`,
     },
-    scripts: [],
   };
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
       next: { revalidate: 3600 },
     });
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
     const data = await response.json();
     const articulos = Array.isArray(data.data) ? data.data : [];
@@ -59,28 +56,6 @@ export async function generateMetadata() {
             .join(", ")} y más temas esenciales para tu salud.`,
         },
       };
-
-      metadata.scripts.push({
-        type: "application/ld+json",
-        innerHTML: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Categorías de Artículos sobre Salud y Bienestar",
-          description: metadata.description,
-          publisher: {
-            "@type": "Organization",
-            name: "SaludySer",
-            logo: {
-              "@type": "ImageObject",
-              url: `${baseUrl}/logo.jpg`,
-            },
-          },
-          mainEntity: categorias.map((categoria) => ({
-            "@type": "Category",
-            name: categoria,
-          })),
-        }),
-      });
     }
   } catch (error) {
     console.error("Error al generar metadata dinámica:", error.message);
@@ -92,6 +67,7 @@ export async function generateMetadata() {
 // 📌 Página principal
 export default async function ArticulosPage() {
   let articulos = [];
+  let categorias = [];
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
@@ -101,12 +77,43 @@ export default async function ArticulosPage() {
 
     const data = await response.json();
     articulos = Array.isArray(data.data) ? data.data : [];
+
+    // Generar categorías únicas
+    categorias = Array.from(
+      new Set(articulos.map((articulo) => articulo.category).filter(Boolean))
+    );
   } catch (error) {
     console.error("Error al obtener los artículos:", error.message);
   }
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Categorías de Artículos sobre Salud y Bienestar",
+    description:
+      "Descubre todas las categorías y artículos sobre salud, bienestar físico y mental, nutrición, ejercicio, prevención médica y más temas esenciales para tu calidad de vida.",
+    publisher: {
+      "@type": "Organization",
+      name: "Salud y Ser",
+      logo: {
+        "@type": "ImageObject",
+        url: `${baseUrl}/logo.jpg`,
+      },
+    },
+    mainEntity: categorias.map((categoria) => ({
+      "@type": "Category",
+      name: categoria,
+    })),
+  };
+
   return (
     <section className="bg-gray-50 min-h-screen mt-16">
+      {/* Datos estructurados */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <h1 className="text-5xl font-extrabold text-center text-gray-800 py-8">
         Categorías de Artículos sobre Salud, Nutrición y Bienestar
       </h1>
@@ -115,6 +122,7 @@ export default async function ArticulosPage() {
         mental y emocional. Aprende sobre nutrición, ejercicio, salud mental,
         prevención médica y más temas esenciales para tu calidad de vida.
       </p>
+
       {articulos.length > 0 ? (
         <MenuCategorias
           articulos={articulos.map((articulo) => ({
@@ -126,7 +134,9 @@ export default async function ArticulosPage() {
           }))}
         />
       ) : (
-        <p className="text-center text-gray-600">No hay artículos disponibles.</p>
+        <div className="text-center text-gray-600 py-16">
+          <p className="text-lg">No hay artículos disponibles en este momento.</p>
+        </div>
       )}
     </section>
   );

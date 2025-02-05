@@ -15,16 +15,16 @@ export async function generateStaticParams() {
       : [];
   } catch (error) {
     console.error("Error al generar rutas estáticas:", error.message);
-    return []; // Devolver un arreglo vacío para evitar que el build falle
+    return []; // Devuelve un arreglo vacío para evitar errores en el build
   }
 }
 
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const resolvedParams = await params; // Resuelve la promesa de params
-  const { categoria: categoriaSlug } = resolvedParams;
+  const { categoria: categoriaSlug } = params;
   const categoriaNombre = decodeURIComponent(categoriaSlug.replace(/-/g, " ")).toLowerCase();
 
+  // Metadatos predeterminados
   let metadata = {
     title: `Artículos sobre ${categoriaNombre} | Saludyser`,
     description: `Explora los mejores artículos sobre ${categoriaNombre} en Saludyser.`,
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }) {
           images: [
             {
               url: data.image_url || `${baseUrl}/images/categorias/${categoriaSlug}.jpg`,
-              alt: data.image_alt || `Artículos sobre ${categoriaNombre} - Saludyser`,
+              alt: data.image_alt || `Artículos sobre ${data.name} - Saludyser`,
               width: 1200,
               height: 630,
             },
@@ -75,17 +75,44 @@ export async function generateMetadata({ params }) {
       };
     }
   } catch (error) {
-    console.error(`Error al generar metadatos para la categoría: ${categoriaSlug}`, error.message);
+    console.error(
+      `Error al generar metadatos dinámicos para la categoría: ${categoriaSlug}`,
+      error.message
+    );
   }
 
   return metadata;
 }
 
-
 // 📌 Layout de Categorías
 export default function CategoriaLayout({ children }) {
   return (
     <main className="min-h-screen bg-gray-50">
+      {/* Datos Estructurados */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Categorías en Saludyser",
+            description:
+              "Explora las mejores categorías de salud, bienestar y vida saludable en Saludyser.",
+            publisher: {
+              "@type": "Organization",
+              name: "Saludyser",
+              logo: {
+                "@type": "ImageObject",
+                url: `${baseUrl}/logo.jpg`,
+              },
+            },
+            mainEntityOfPage: {
+              "@type": "CategoryPage",
+              name: "Categorías de Artículos",
+            },
+          }),
+        }}
+      />
       <section className="max-w-6xl mx-auto px-4 py-8">{children}</section>
     </main>
   );

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
 
-// Función para obtener artículos en el servidor
+// 📌 Función para obtener artículos
 async function fetchArticulos() {
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
@@ -24,7 +24,7 @@ async function fetchArticulos() {
   }
 }
 
-// Generar metadatos dinámicos basados en datos de la API
+// 📌 Generar metadatos dinámicos
 export async function generateMetadata() {
   const metadataBase = new URL(baseUrl);
   const articulos = await fetchArticulos();
@@ -99,11 +99,35 @@ export async function generateMetadata() {
   return metadata;
 }
 
+// 📌 Componente Principal
 export default async function Home() {
   const articulos = await fetchArticulos();
 
+  // Datos estructurados (JSON-LD)
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Salud y Ser | Guías de Bienestar Físico y Mental",
+    description:
+      "Descubre artículos, guías y consejos prácticos para mejorar tu bienestar físico y mental.",
+    mainEntity: articulos.map((articulo) => ({
+      "@type": "Article",
+      headline: articulo.title,
+      description: articulo.description || "Descripción no disponible.",
+      image: articulo.image || "/images/default.jpg",
+      url: `${baseUrl}/articulos/${articulo.slug}`,
+    })),
+  };
+
   return (
     <>
+      {/* Datos estructurados */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      {/* Hero */}
       <Hero />
 
       {/* Artículos Destacados */}
@@ -121,7 +145,7 @@ export default async function Home() {
         )}
       </section>
 
-      {/* Llamado a la Acción Profesional */}
+      {/* Llamado a la Acción */}
       <section className="container mx-auto px-6 py-16 mt-16 mb-20 rounded-xl text-center shadow-xl bg-gradient-to-r from-green-500 to-green-400 text-white">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl font-extrabold mb-4">Cuida tu Bienestar Integral</h2>
