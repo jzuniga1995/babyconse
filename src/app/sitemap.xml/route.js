@@ -29,17 +29,18 @@ export async function GET() {
     console.error("Error al cargar categorías:", error.message);
   }
 
-  // Validar y generar URLs dinámicas
+  // Generar URLs dinámicas para artículos
   const articleUrls = Array.isArray(articles)
     ? articles.map((article) => ({
-        url: `https://www.saludyser.com/articulos/${article.slug}`,
-        lastModified: new Date(article.updatedAt).toISOString(),
+        url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
+        lastModified: new Date(article.updatedAt || new Date()).toISOString(),
       }))
     : [];
 
+  // Generar URLs dinámicas para categorías
   const categoryUrls = Array.isArray(categories)
     ? categories.map((category) => ({
-        url: `https://www.saludyser.com/categorias/${category.slug}`,
+        url: `https://www.saludyser.com/categorias/${encodeURIComponent(category.slug)}`,
         lastModified: new Date().toISOString(),
       }))
     : [];
@@ -62,6 +63,7 @@ export async function GET() {
         .join("")}
     </urlset>`;
 
+  // Retornar el sitemap como respuesta
   return new Response(sitemap, {
     headers: {
       "Content-Type": "application/xml",
