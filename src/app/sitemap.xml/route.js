@@ -28,7 +28,14 @@ export async function GET() {
     const categoriesRes = await fetch("https://www.saludyser.com/api/categorias");
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
     const categoriesData = await categoriesRes.json();
-    categories = categoriesData.data || []; // Accede al array dentro de "data"
+
+    // Manejo directo de categorías (sin `data`)
+    if (categoriesData) {
+      categories = Object.entries(categoriesData).map(([slug, category]) => ({
+        slug,
+        name: category.name,
+      }));
+    }
   } catch (error) {
     console.error("Error al cargar categorías:", error.message);
   }
