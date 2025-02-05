@@ -7,9 +7,13 @@ const limit = 9;
 
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
+  // Resolver parámetros
   const categoriaSlug = params?.categoria || "";
-  const categoria = decodeURIComponent(categoriaSlug.replace(/-/g, " "));
+  const categoria = categoriaSlug
+    ? decodeURIComponent(categoriaSlug.replace(/-/g, " "))
+    : "Categoría no válida";
 
+  // Obtener página actual desde `searchParams`
   const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
@@ -21,6 +25,7 @@ export default async function CategoriaPage({ params, searchParams }) {
       `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
       { next: { revalidate: 3600 } }
     );
+
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
     const data = await response.json();
@@ -32,7 +37,7 @@ export default async function CategoriaPage({ params, searchParams }) {
 
   const pages = total > 0 ? Math.ceil(total / limit) : 0;
 
-  // JSON-LD para datos estructurados
+  // JSON-LD para SEO (Datos estructurados)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -49,7 +54,7 @@ export default async function CategoriaPage({ params, searchParams }) {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-16">
-      {/* Datos estructurados */}
+      {/* Datos estructurados para SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -71,8 +76,8 @@ export default async function CategoriaPage({ params, searchParams }) {
             >
               <div className="relative w-full h-48">
                 <Image
-                  src={articulo.image || "/images/default.jpg"} // Si no hay imagen, usa una predeterminada
-                  alt={`Imagen del artículo: ${articulo.title}`}
+                  src={articulo.image || "/images/default.jpg"} // Imagen predeterminada si no hay
+                  alt={`Imagen del artículo ${articulo.title || "sin título"}`}
                   layout="fill"
                   objectFit="cover"
                   className="rounded-t-lg"
@@ -97,8 +102,10 @@ export default async function CategoriaPage({ params, searchParams }) {
 
       {/* Paginación */}
       <div className="flex justify-center mt-16">
-        {pages > 1 && (
+        {pages > 1 ? (
           <PaginationWrapper page={page} pages={pages} categoriaSlug={categoriaSlug} />
+        ) : (
+          <p className="text-gray-500">No hay más páginas para mostrar.</p>
         )}
       </div>
     </div>
