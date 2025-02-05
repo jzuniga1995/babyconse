@@ -17,7 +17,8 @@ export async function GET() {
   try {
     const articlesRes = await fetch("https://www.saludyser.com/api/articulos");
     if (!articlesRes.ok) throw new Error("Error al obtener artículos");
-    articles = await articlesRes.json();
+    const articlesData = await articlesRes.json();
+    articles = articlesData.data || []; // Accede al array dentro de "data"
   } catch (error) {
     console.error("Error al cargar artículos:", error.message);
   }
@@ -26,7 +27,7 @@ export async function GET() {
   try {
     const categoriesRes = await fetch("https://www.saludyser.com/api/categorias");
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
-    categories = await categoriesRes.json();
+    categories = categoriesRes.json();
   } catch (error) {
     console.error("Error al cargar categorías:", error.message);
   }
