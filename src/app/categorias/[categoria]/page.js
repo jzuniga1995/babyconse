@@ -7,7 +7,7 @@ const limit = 9;
 
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
-  // 🔴 SOLUCIÓN: Resolver params y searchParams correctamente
+  // Resolver params y searchParams correctamente
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
@@ -56,7 +56,7 @@ export default async function CategoriaPage({ params, searchParams }) {
             >
               <div className="relative w-full h-48">
                 <Image
-                  src={articulo.image?.startsWith("http") ? articulo.image : "/images/default.jpg"}
+                  src={articulo.image || "/images/default.jpg"} // Si no hay imagen, usa una predeterminada
                   alt={`Imagen del artículo ${articulo.title || "sin título"}`}
                   layout="fill"
                   objectFit="cover"
