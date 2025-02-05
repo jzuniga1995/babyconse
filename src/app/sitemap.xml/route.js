@@ -9,10 +9,11 @@ export async function GET() {
     { url: "https://www.saludyser.com/nosotros", lastModified: new Date().toISOString() },
   ];
 
-  // Obtener datos dinámicos con manejo de errores
+  // Variables para datos dinámicos
   let articles = [];
   let categories = [];
 
+  // Obtener datos dinámicos de artículos
   try {
     const articlesRes = await fetch("https://www.saludyser.com/api/articulos");
     if (!articlesRes.ok) throw new Error("Error al obtener artículos");
@@ -21,6 +22,7 @@ export async function GET() {
     console.error("Error al cargar artículos:", error.message);
   }
 
+  // Obtener datos dinámicos de categorías
   try {
     const categoriesRes = await fetch("https://www.saludyser.com/api/categorias");
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
@@ -31,18 +33,22 @@ export async function GET() {
 
   // Generar URLs dinámicas para artículos
   const articleUrls = Array.isArray(articles)
-    ? articles.map((article) => ({
-        url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
-        lastModified: new Date(article.updatedAt || new Date()).toISOString(),
-      }))
+    ? articles
+        .filter((article) => article.slug) // Filtrar artículos sin slug
+        .map((article) => ({
+          url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
+          lastModified: new Date(article.updatedAt || new Date()).toISOString(),
+        }))
     : [];
 
   // Generar URLs dinámicas para categorías
   const categoryUrls = Array.isArray(categories)
-    ? categories.map((category) => ({
-        url: `https://www.saludyser.com/categorias/${encodeURIComponent(category.slug)}`,
-        lastModified: new Date().toISOString(),
-      }))
+    ? categories
+        .filter((category) => category.slug) // Filtrar categorías sin slug
+        .map((category) => ({
+          url: `https://www.saludyser.com/categorias/${encodeURIComponent(category.slug)}`,
+          lastModified: new Date().toISOString(),
+        }))
     : [];
 
   // Combinar todas las URLs
