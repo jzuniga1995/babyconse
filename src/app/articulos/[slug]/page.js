@@ -93,7 +93,7 @@ export default async function ArticuloDetallesPage({ params }) {
 
     // Obtener referencias del artículo
     const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     if (refResponse.ok) {
       const refData = await refResponse.json();
