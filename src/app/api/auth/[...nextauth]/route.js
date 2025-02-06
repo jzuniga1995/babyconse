@@ -9,6 +9,12 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Verificar si se proporciona un callbackUrl válido
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+  },
 };
 
 // Configuración de NextAuth

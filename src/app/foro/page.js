@@ -155,12 +155,13 @@ export default function Foro() {
   if (!user)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <button
-          onClick={() => signIn()}
-          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
-        >
-          Iniciar Sesión
-        </button>
+    <button
+  onClick={() => signIn("google", { callbackUrl: "/foro" })}
+  className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
+>
+  Iniciar Sesión
+</button>
+
       </div>
     );
 
