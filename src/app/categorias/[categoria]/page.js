@@ -7,14 +7,17 @@ const limit = 9;
 
 // 📌 Página de categoría
 export default async function CategoriaPage({ params, searchParams }) {
-  // Resolver parámetros
-  const categoriaSlug = params?.categoria || "";
+  // Resolver `params` y `searchParams`
+  const resolvedParams = await params; // Resolver params como promesa
+  const resolvedSearchParams = await searchParams; // Resolver searchParams como promesa
+
+  const categoriaSlug = resolvedParams?.categoria || "";
   const categoria = categoriaSlug
     ? decodeURIComponent(categoriaSlug.replace(/-/g, " "))
     : "Categoría no válida";
 
-  // Obtener página actual desde `searchParams`
-  const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
+  // Obtener página actual desde searchParams
+  const page = resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page, 10) : 1;
   const offset = (page - 1) * limit;
 
   let articulos = [];

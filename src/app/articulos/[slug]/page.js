@@ -21,9 +21,9 @@ export async function generateStaticParams() {
   }
 }
 
-// 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const { slug } = params;
+  const resolvedParams = await params; // Resolver params como promesa
+  const { slug } = resolvedParams; // Acceder al slug después de resolver la promesa
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -53,6 +53,10 @@ export async function generateMetadata({ params }) {
             tags: articulo.meta_keywords ? articulo.meta_keywords.split(",") : [],
           },
         },
+        // ✅ Agregar la canónica dinámica
+        alternates: {
+          canonical: `${baseUrl}/articulos/${slug}`,
+        },
       };
     }
   } catch (error) {
@@ -62,12 +66,16 @@ export async function generateMetadata({ params }) {
   return {
     title: "Artículo no encontrado - Salud y Ser",
     description: "El artículo que buscas no está disponible.",
+    alternates: {
+      canonical: `${baseUrl}/articulos/${slug}`, // Canónica genérica en caso de error
+    },
   };
 }
 
 // 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {
-  const { slug } = params;
+  const resolvedParams = await params; // Resolver params como promesa
+  const { slug } = resolvedParams;
 
   let articulo = null;
   let articulosRelacionados = [];

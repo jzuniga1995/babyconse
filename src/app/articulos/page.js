@@ -1,7 +1,6 @@
 import MenuCategorias from "../components/MenuCategorias";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// 📌 Generar metadatos dinámicos
 export async function generateMetadata() {
   let metadata = {
     title: "Categorías de Salud y Bienestar | Artículos - Salud y Ser",
@@ -25,7 +24,7 @@ export async function generateMetadata() {
       ],
     },
     alternates: {
-      canonical: `${baseUrl}/articulos`,
+      canonical: `${baseUrl}/articulos`, // URL canónica predeterminada
     },
   };
 
@@ -55,6 +54,10 @@ export async function generateMetadata() {
             .slice(0, 3)
             .join(", ")} y más temas esenciales para tu salud.`,
         },
+        // ✅ Actualizar la URL canónica según las categorías
+        alternates: {
+          canonical: `${baseUrl}/articulos`,
+        },
       };
     }
   } catch (error) {
@@ -63,6 +66,7 @@ export async function generateMetadata() {
 
   return metadata;
 }
+
 
 // 📌 Página principal
 export default async function ArticulosPage() {

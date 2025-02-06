@@ -21,67 +21,74 @@ export async function generateStaticParams() {
 
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
-  const { categoria: categoriaSlug } = params;
-  const categoriaNombre = decodeURIComponent(categoriaSlug.replace(/-/g, " ")).toLowerCase();
-
-  // Metadatos predeterminados
-  let metadata = {
-    title: `Artículos sobre ${categoriaNombre} | Saludyser`,
-    description: `Explora los mejores artículos sobre ${categoriaNombre} en Saludyser.`,
-    openGraph: {
-      title: `Artículos sobre ${categoriaNombre} | Saludyser`,
-      description: `Descubre artículos destacados sobre ${categoriaNombre}.`,
-      url: `${baseUrl}/categorias/${categoriaSlug}`,
-      images: [
-        {
-          url: `${baseUrl}/images/categorias/default-category.jpg`,
-          alt: `Artículos sobre ${categoriaNombre} - Saludyser`,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    alternates: {
-      canonical: `${baseUrl}/categorias/${categoriaSlug}`,
-    },
-  };
-
   try {
+    const resolvedParams = await params; // Asegúrate de resolver params si es necesario
+    const { categoria: categoriaSlug } = resolvedParams || {}; // Validar que exista params
+
+    if (!categoriaSlug) {
+      throw new Error("El parámetro 'categoriaSlug' es obligatorio.");
+    }
+
+    const categoriaNombre = decodeURIComponent(categoriaSlug.replace(/-/g, " ")).toLowerCase();
+
+    let metadata = {
+      title: `Artículos sobre ${categoriaNombre} | Saludyser`,
+      description: `Explora los mejores artículos sobre ${categoriaNombre} en Saludyser.`,
+      openGraph: {
+        title: `Artículos sobre ${categoriaNombre} | Saludyser`,
+        description: `Descubre artículos destacados sobre ${categoriaNombre}.`,
+        url: `${baseUrl}/categorias/${categoriaSlug}`,
+        images: [
+          {
+            url: `${baseUrl}/images/categorias/default-category.jpg`,
+            alt: `Artículos sobre ${categoriaNombre} - Saludyser`,
+            width: 1200,
+            height: 630,
+          },
+        ],
+      },
+      alternates: {
+        canonical: `${baseUrl}/categorias/${categoriaSlug}`,
+      },
+    };
+
     const response = await fetch(`${baseUrl}/api/categorias/${categoriaSlug}`, {
       next: { revalidate: 3600 },
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
-    const data = await response.json();
+    if (response.ok) {
+      const data = await response.json();
 
-    if (data && data.name) {
-      metadata = {
-        ...metadata,
-        title: `Artículos sobre ${data.name} | Saludyser`,
-        description: data.meta_description || metadata.description,
-        openGraph: {
-          ...metadata.openGraph,
+      if (data && data.name) {
+        metadata = {
+          ...metadata,
           title: `Artículos sobre ${data.name} | Saludyser`,
-          description: data.meta_description || metadata.openGraph.description,
-          images: [
-            {
-              url: data.image_url || `${baseUrl}/images/categorias/${categoriaSlug}.jpg`,
-              alt: data.image_alt || `Artículos sobre ${data.name} - Saludyser`,
-              width: 1200,
-              height: 630,
-            },
-          ],
-        },
-      };
+          description: data.meta_description || metadata.description,
+          openGraph: {
+            ...metadata.openGraph,
+            title: `Artículos sobre ${data.name} | Saludyser`,
+            description: data.meta_description || metadata.openGraph.description,
+            images: [
+              {
+                url: data.image_url || `${baseUrl}/images/categorias/${categoriaSlug}.jpg`,
+                alt: data.image_alt || `Artículos sobre ${data.name} - Saludyser`,
+                width: 1200,
+                height: 630,
+              },
+            ],
+          },
+        };
+      }
     }
-  } catch (error) {
-    console.error(
-      `Error al generar metadatos dinámicos para la categoría: ${categoriaSlug}`,
-      error.message
-    );
-  }
 
-  return metadata;
+    return metadata;
+  } catch (error) {
+    console.error("Error al generar metadatos dinámicos:", error.message);
+    return {
+      title: "Error - Saludyser",
+      description: "Ocurrió un problema al generar los metadatos.",
+    };
+  }
 }
 
 // 📌 Layout de Categorías

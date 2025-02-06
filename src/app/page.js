@@ -24,7 +24,6 @@ async function fetchArticulos() {
   }
 }
 
-// 📌 Generar metadatos dinámicos
 export async function generateMetadata() {
   const metadataBase = new URL(baseUrl);
   const articulos = await fetchArticulos();
@@ -81,6 +80,9 @@ export async function generateMetadata() {
           alt: articulo.title,
         })),
       },
+      alternates: {
+        canonical: metadataBase.href, // La URL base será dinámica
+      },
       keywords: articulos
         .flatMap((articulo) => articulo.meta_keywords?.split(",") || [])
         .map((kw) => kw.trim())
@@ -98,6 +100,7 @@ export async function generateMetadata() {
 
   return metadata;
 }
+
 
 // 📌 Componente Principal
 export default async function Home() {

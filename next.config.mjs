@@ -3,16 +3,14 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'tusitio.com', // Dominio principal
-        port: '', // Deja vacío si no usas un puerto específico
-        pathname: '/images/**', // Ruta de las imágenes
+        protocol: "https",
+        hostname: "www.saludyser.com", // Dominio principal
+        pathname: "/images/**", // Ruta de imágenes dentro de tu dominio
       },
       {
-        protocol: 'https',
-        hostname: 'cdn.tusitio.com', // Ejemplo de otro dominio
-        port: '',
-        pathname: '/assets/images/**', // Ruta de imágenes en el CDN
+        protocol: "https",
+        hostname: "cdn.saludyser.com", // Si tienes un CDN
+        pathname: "/assets/images/**",
       },
     ],
   },

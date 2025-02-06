@@ -4,9 +4,21 @@ export async function GET(request, context) {
   let connection;
 
   try {
-    console.log("context.params:", context.params);
+    console.log("Resolviendo context.params...");
+    const params = await context.params; // Resuelve context.params si es una promesa
 
-    const { categoria } = context.params;
+    if (!params || typeof params !== "object") {
+      console.error("Los parámetros no están definidos o no son válidos.");
+      return new Response(
+        JSON.stringify({ error: "Los parámetros no son válidos." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { categoria } = params;
 
     if (!categoria || typeof categoria !== "string" || categoria.trim() === "") {
       console.warn("Categoría no válida o no proporcionada.");
