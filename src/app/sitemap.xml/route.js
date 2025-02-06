@@ -1,4 +1,6 @@
 export async function GET() {
+  console.log("Generando sitemap...");
+
   // Rutas estáticas
   const staticUrls = [
     { url: "https://www.saludyser.com", lastModified: new Date().toISOString() },
@@ -9,86 +11,79 @@ export async function GET() {
     { url: "https://www.saludyser.com/nosotros", lastModified: new Date().toISOString() },
   ];
 
-  // Variables para datos dinámicos
   let articles = [];
   let categories = [];
 
-  // Función para normalizar slugs
+  // Normalizar slugs
   function normalizeSlug(text) {
     return text
-      .toLowerCase() // Convertir a minúsculas
-      .normalize("NFD") // Eliminar tildes y diacríticos
-      .replace(/[\u0300-\u036f]/g, "") // Remover acentos
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remover tildes
       .replace(/\s+/g, "-") // Reemplazar espacios por guiones
-      .replace(/[^\w\-]+/g, ""); // Eliminar caracteres especiales
+      .replace(/[^\w\-]+/g, ""); // Eliminar caracteres no válidos
   }
 
-  // Obtener datos dinámicos de artículos
+  // Cargar artículos dinámicos
   try {
     const articlesRes = await fetch("https://www.saludyser.com/api/articulos");
-    if (!articlesRes.ok) throw new Error("Error al obtener artículos");
+    if (!articlesRes.ok) throw new Error(`Error al obtener artículos: ${articlesRes.status}`);
     const articlesData = await articlesRes.json();
-    articles = articlesData.data || []; // Accede al array dentro de "data"
+    articles = Array.isArray(articlesData?.data) ? articlesData.data : [];
+    console.log("Artículos cargados:", articles.length);
   } catch (error) {
     console.error("Error al cargar artículos:", error.message);
   }
 
-  // Obtener datos dinámicos de categorías
+  // Cargar categorías dinámicas
   try {
     const categoriesRes = await fetch("https://www.saludyser.com/api/categorias");
-    if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
+    if (!categoriesRes.ok) throw new Error(`Error al obtener categorías: ${categoriesRes.status}`);
     const categoriesData = await categoriesRes.json();
-
-    // Convertir el objeto en un array si es necesario
-    categories = Array.isArray(categoriesData)
-      ? categoriesData
-      : Object.values(categoriesData);
+    categories = Array.isArray(categoriesData) ? categoriesData : Object.values(categoriesData);
+    console.log("Categorías cargadas:", categories.length);
   } catch (error) {
     console.error("Error al cargar categorías:", error.message);
   }
 
-  // Generar URLs dinámicas para artículos
-  const articleUrls = Array.isArray(articles)
-    ? articles
-        .filter((article) => article.slug) // Filtrar artículos sin slug
-        .map((article) => ({
-          url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
-          lastModified: new Date(article.updatedAt || new Date()).toISOString(),
-        }))
-    : [];
+  // Generar URLs para artículos
+  const articleUrls = articles.map((article) => ({
+    url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
+    lastModified: new Date(article.updatedAt || article.published_at || new Date()).toISOString(),
+  }));
 
-  // Generar URLs dinámicas para categorías
-  const categoryUrls = Array.isArray(categories)
-    ? categories
-        .filter((category) => category.slug) // Filtrar categorías sin slug
-        .map((category) => ({
-          url: `https://www.saludyser.com/categorias/${normalizeSlug(category.slug)}`,
-          lastModified: new Date().toISOString(),
-        }))
-    : [];
+  // Generar URLs para categorías
+  const categoryUrls = categories.map((category) => ({
+    url: `https://www.saludyser.com/categorias/${normalizeSlug(category.slug)}`,
+    lastModified: new Date().toISOString(),
+  }));
 
-  // Combinar todas las URLs
+  // Combinar URLs
   const urls = [...staticUrls, ...articleUrls, ...categoryUrls];
 
-  // Generar el XML del sitemap
+  // Generar XML del sitemap
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${urls
-        .map(
-          ({ url, lastModified }) => `
-        <url>
-          <loc>${url}</loc>
-          <lastmod>${lastModified}</lastmod>
-        </url>
-      `
-        )
-        .join("")}
-    </urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  ${urls
+    .map(
+      ({ url, lastModified }) => `
+    <url>
+      <loc>${url}</loc>
+      <lastmod>${lastModified}</lastmod>
+    </url>
+  `
+    )
+    .join("")}
+</urlset>`;
 
-  // Retornar el sitemap como respuesta
+  // Verificar el sitemap generado (opcional, solo para debugging)
+  console.log("Sitemap generado con", urls.length, "URLs");
+
+  // Retornar el sitemap
   return new Response(sitemap, {
     headers: {
       "Content-Type": "application/xml",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", // Evitar caché
     },
   });
 }
