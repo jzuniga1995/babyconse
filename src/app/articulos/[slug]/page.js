@@ -22,8 +22,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const resolvedParams = await params;
-  const { slug } = resolvedParams;
+  const resolvedParams = await params; // Resolver params como promesa
+  const { slug } = resolvedParams; // Acceder al slug después de resolver la promesa
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -53,6 +53,7 @@ export async function generateMetadata({ params }) {
             tags: articulo.meta_keywords ? articulo.meta_keywords.split(",") : [],
           },
         },
+        // ✅ Agregar la canónica dinámica
         alternates: {
           canonical: `${baseUrl}/articulos/${slug}`,
         },
@@ -66,17 +67,19 @@ export async function generateMetadata({ params }) {
     title: "Artículo no encontrado - Salud y Ser",
     description: "El artículo que buscas no está disponible.",
     alternates: {
-      canonical: `${baseUrl}/articulos/${slug}`,
+      canonical: `${baseUrl}/articulos/${slug}`, // Canónica genérica en caso de error
     },
   };
 }
 
+// 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {
-  const resolvedParams = await params;
+  const resolvedParams = await params; // Resolver params como promesa
   const { slug } = resolvedParams;
 
   let articulo = null;
   let articulosRelacionados = [];
+  let referencias = [];
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -87,6 +90,15 @@ export default async function ArticuloDetallesPage({ params }) {
 
     articulo = data.articulo;
     articulosRelacionados = data.relacionados || [];
+
+    // Obtener referencias del artículo
+    const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
+      next: { revalidate: 3600 },
+    });
+    if (refResponse.ok) {
+      const refData = await refResponse.json();
+      referencias = refData.references || [];
+    }
   } catch (error) {
     console.error("Error al obtener los datos:", error.message);
   }
@@ -157,23 +169,38 @@ export default async function ArticuloDetallesPage({ params }) {
                 />
               ),
               ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+              ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
               li: ({ ...props }) => <li className="mb-2" {...props} />,
-              a: ({ ...props }) => (
-                <a
-                  className="text-blue-500 hover:text-blue-700 underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  {...props}
-                />
-              ),
             }}
           >
             {articulo?.full_content || "Contenido no disponible."}
           </ReactMarkdown>
         </div>
+
+        {referencias.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-xl font-bold text-gray-800 border-b border-gray-300 pb-2">
+              Fuentes y Referencias
+            </h2>
+            <ul className="list-disc pl-6 mt-4 space-y-2">
+              {referencias.map((ref, index) => (
+                <li key={index}>
+                  <a
+                    href={ref.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-700 underline"
+                  >
+                    {ref.title || "Referencia sin título"}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {articulosRelacionados.length > 0 && (
+      {articulosRelacionados.length > 0 ? (
         <div className="max-w-4xl mx-auto px-4 mt-10">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Más artículos sobre {articulo?.category || "este tema"}
@@ -202,8 +229,13 @@ export default async function ArticuloDetallesPage({ params }) {
             ))}
           </div>
         </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
+          <p className="text-gray-600">No se encontraron artículos relacionados.</p>
+        </div>
       )}
 
+      {/* Incluir datos estructurados */}
       {structuredData && (
         <script
           type="application/ld+json"
