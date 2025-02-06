@@ -1,16 +1,7 @@
 export async function GET() {
     console.log("Generando sitemap...");
   
-    // Rutas estáticas
-    const staticUrls = [
-      { url: "https://www.saludyser.com", lastModified: new Date().toISOString() },
-      { url: "https://www.saludyser.com/contacto", lastModified: new Date().toISOString() },
-      { url: "https://www.saludyser.com/foro", lastModified: new Date().toISOString() },
-      { url: "https://www.saludyser.com/politica", lastModified: new Date().toISOString() },
-      { url: "https://www.saludyser.com/terminos", lastModified: new Date().toISOString() },
-      { url: "https://www.saludyser.com/nosotros", lastModified: new Date().toISOString() },
-    ];
-  
+
     let articles = [];
     let categories = [];
   
