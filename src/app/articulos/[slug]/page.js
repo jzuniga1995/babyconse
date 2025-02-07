@@ -199,41 +199,47 @@ export default async function ArticuloDetallesPage({ params }) {
           </div>
         )}
       </div>
-
       {articulosRelacionados.length > 0 ? (
-        <div className="max-w-4xl mx-auto px-4 mt-10">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            Más artículos sobre {articulo?.category || "este tema"}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {articulosRelacionados.map((rel) => (
-              <Link key={rel.id} href={`/articulos/${rel.slug}`} className="block group">
-                <div className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition">
-                  <Image
-                    src={rel.image || "/default-image.jpg"}
-                    alt={`Imagen del artículo: ${rel.title}`}
-                    width={400}
-                    height={200}
-                    className="object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-500 transition-colors">
-                      {rel.title || "Título no disponible"}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                      {rel.meta_description || rel.description || "No hay descripción disponible."}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+  <div className="max-w-6xl mx-auto px-4 mt-10">
+    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+      Más artículos sobre {articulo?.category || "este tema"}
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {articulosRelacionados.map((rel) => (
+        <Link
+          key={rel.id}
+          href={`/articulos/${rel.slug}`}
+          className="block group"
+        >
+          <div className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition">
+            <Image
+              src={rel.image || "/default-image.jpg"}
+              alt={`Imagen del artículo: ${rel.title}`}
+              width={400}
+              height={200}
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="text-lg font-bold text-gray-800 group-hover:text-green-500 transition-colors">
+                {rel.title || "Título no disponible"}
+              </h3>
+              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                {rel.meta_description ||
+                  rel.description ||
+                  "No hay descripción disponible."}
+              </p>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
-          <p className="text-gray-600">No se encontraron artículos relacionados.</p>
-        </div>
-      )}
+        </Link>
+      ))}
+    </div>
+  </div>
+) : (
+  <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
+    <p className="text-gray-600">No se encontraron artículos relacionados.</p>
+  </div>
+)}
+
 
       {/* Incluir datos estructurados */}
       {structuredData && (
