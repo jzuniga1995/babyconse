@@ -7,8 +7,6 @@ import CookieConsent from "./components/CookieConsent";
 import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/react"; // ✅ Importación de Vercel Analytics
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://www.saludyser.com"; // URL base desde variables de entorno
-
 export default function RootLayout({ children }) {
   const isClient = typeof window !== "undefined";
   const isSpecialRoute = isClient
@@ -20,18 +18,12 @@ export default function RootLayout({ children }) {
       <head>
         {/* ✅ Favicon */}
         <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
         <meta charSet="UTF-8" />
-        <meta
-          name="description"
-          content="Guías de bienestar físico y mental en Salud y Ser."
-        />
-
-        {/* ✅ Etiqueta canónica */}
-        <link rel="canonical" href={baseUrl} />
+        <meta name="description" content="Guías de bienestar físico y mental en Salud y Ser." />
       </head>
       <body className="bg-gray-50 font-sans">
         {/* Excluir componentes globales en rutas especiales */}
