@@ -49,13 +49,13 @@ export default function ArticulosRandom({ articulos }) {
           />
         </div>
         <div className="p-6">
-          <h4 className="text-2xl font-semibold text-gray-800 hover:text-blue-500 transition">
+          <h4 className="text-2xl font-semibold text-gray-800 hover:text-green-500 transition">
             {featuredArticle.title || "Título no disponible"}
           </h4>
           <p className="text-gray-600 mt-3">
             {featuredArticle.description || "Descripción no disponible"}
           </p>
-          <span className="inline-block mt-4 text-blue-500 hover:text-blue-700">
+          <span className="inline-block mt-4 text-blue-500 hover:text-green-700">
             Leer más →
           </span>
         </div>
@@ -78,13 +78,13 @@ export default function ArticulosRandom({ articulos }) {
               />
             </div>
             <div className="p-4">
-              <h4 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
+              <h4 className="text-xl font-semibold text-gray-800 group-hover:text-green-500 transition">
                 {articulo.title || "Título no disponible"}
               </h4>
               <p className="text-gray-600 mt-2">
                 {articulo.description || "Descripción no disponible"}
               </p>
-              <span className="inline-block mt-4 text-blue-500 group-hover:text-blue-700">
+              <span className="inline-block mt-4 text-blue-500 group-hover:text-green-700">
                 Leer más →
               </span>
             </div>

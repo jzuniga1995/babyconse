@@ -87,7 +87,7 @@ export default async function CategoriaPage({ params, searchParams }) {
                 />
               </div>
               <div className="p-4">
-                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-blue-500 transition">
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-green-500 transition">
                   {articulo.title}
                 </h3>
                 <p className="text-gray-600 mt-2 text-sm">
