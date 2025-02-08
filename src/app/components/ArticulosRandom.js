@@ -1,38 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ArticulosRandom() {
-  const [randomArticles, setRandomArticles] = useState([]);
-  const [featuredArticle, setFeaturedArticle] = useState(null);
+export default function ArticulosRandom({ articulos }) {
+  // Verificar que se reciben artículos correctamente
+  console.log("Artículos recibidos:", articulos);
 
-  const fetchRandomArticles = async () => {
-    try {
-      const response = await fetch("/api/articulos/random");
-      if (!response.ok) throw new Error("Error al obtener artículos aleatorios.");
-      const data = await response.json();
-      if (data.articulos.length > 0) {
-        setFeaturedArticle(data.articulos[0]);
-        setRandomArticles(data.articulos.slice(1));
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchRandomArticles();
-    const interval = setInterval(() => {
-      fetchRandomArticles();
-    }, 60000); // Refrescar cada 60 segundos
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!featuredArticle || randomArticles.length === 0) {
+  if (!articulos || articulos.length === 0) {
     return <p className="text-center text-gray-600">No hay artículos disponibles.</p>;
   }
+
+  const featuredArticle = articulos[0];
+  const randomArticles = articulos.slice(1);
 
   return (
     <>
@@ -45,8 +25,8 @@ export default function ArticulosRandom() {
           <Image
             src={featuredArticle.image || "/images/default.jpg"}
             alt={featuredArticle.title || "Imagen del artículo"}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
           />
         </div>
         <div className="p-6">
@@ -64,9 +44,9 @@ export default function ArticulosRandom() {
 
       {/* Otros Artículos */}
       <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {randomArticles.map((articulo) => (
+        {randomArticles.map((articulo, index) => (
           <Link
-            key={articulo.id}
+            key={articulo.id || index} // Asegúrate de usar un identificador único
             href={`/articulos/${articulo.slug}`}
             className="group block bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
           >
@@ -74,8 +54,8 @@ export default function ArticulosRandom() {
               <Image
                 src={articulo.image || "/images/default.jpg"}
                 alt={articulo.title || "Imagen del artículo"}
-                layout="fill"
-                objectFit="cover"
+                fill
+                style={{ objectFit: "cover" }}
               />
             </div>
             <div className="p-4">

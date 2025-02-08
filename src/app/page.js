@@ -1,112 +1,44 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Hero from "./components/Hero";
 import ArticulosRandom from "./components/ArticulosRandom";
 import Link from "next/link";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variables de entorno
 
-// 📌 Función para obtener artículos
-async function fetchArticulos() {
-  try {
-    const response = await fetch(`${baseUrl}/api/articulos/random`, {
-      next: { revalidate: 3600 },
-    });
+export default function Home() {
+  const [articulos, setArticulos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    if (!response.ok) {
-      throw new Error("Error al obtener los artículos");
+  // 📌 Función para obtener artículos
+  const fetchArticulos = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/articulos/random`);
+      if (!response.ok) {
+        throw new Error("Error al obtener los artículos.");
+      }
+  
+      const data = await response.json();
+      console.log("Datos recibidos:", data); // Depuración
+      setArticulos(data.data || []); // Cambiado a data.data
+      setError(null);
+    } catch (err) {
+      console.error("Error al obtener los artículos:", err.message);
+      setError("No se pudieron cargar los artículos. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error("Error al obtener los artículos:", error.message);
-    return [];
-  }
-}
-
-export async function generateMetadata() {
-  const metadataBase = new URL(baseUrl);
-  const articulos = await fetchArticulos();
-
-  let metadata = {
-    title: "Salud y Ser | Guías de Bienestar Físico y Mental",
-    description:
-      "Mejora tu bienestar físico y mental con artículos confiables, guías prácticas y consejos de salud respaldados por expertos.",
-    openGraph: {
-      title: "Salud y Ser | Artículos y Guías de Salud y Bienestar",
-      description:
-        "Explora consejos y guías prácticas para mejorar tu calidad de vida respaldados por expertos en salud.",
-      type: "website",
-      url: metadataBase.href,
-      images: [
-        {
-          url: `${metadataBase.href}/images/og-image-home.jpg`,
-          alt: "Salud y Ser - Página Principal",
-        },
-      ],
-    },
-    alternates: {
-      canonical: metadataBase.href,
-    },
-    keywords: [
-      "salud",
-      "bienestar",
-      "guías de salud",
-      "artículos de salud",
-      "bienestar físico",
-      "bienestar mental",
-      "vida saludable",
-    ],
   };
+  
 
-  if (articulos.length > 0) {
-    const topArticulos = articulos.slice(0, 5);
+  // 📌 Cargar artículos al montar el componente
+  useEffect(() => {
+    fetchArticulos();
+  }, []);
 
-    metadata = {
-      ...metadata,
-      description: `Descubre artículos destacados como ${topArticulos
-        .map((a) => a.title)
-        .join(", ")}. Mejora tu bienestar físico y mental con guías prácticas de salud respaldadas por expertos.`,
-      openGraph: {
-        ...metadata.openGraph,
-        description: `Descubre artículos destacados como ${topArticulos
-          .map((a) => a.title)
-          .join(", ")} para mejorar tu bienestar físico y mental.`,
-        images: topArticulos.map((articulo) => ({
-          url: new URL(
-            articulo.image || "/images/default.jpg",
-            metadataBase
-          ).href,
-          alt: articulo.title,
-        })),
-      },
-      alternates: {
-        canonical: metadataBase.href, // La URL base será dinámica
-      },
-      keywords: articulos
-        .flatMap((articulo) => articulo.meta_keywords?.split(",") || [])
-        .map((kw) => kw.trim())
-        .concat([
-          "salud",
-          "bienestar",
-          "guías de salud",
-          "artículos de salud",
-          "bienestar físico",
-          "bienestar mental",
-          "vida saludable",
-        ]),
-    };
-  }
-
-  return metadata;
-}
-
-
-// 📌 Componente Principal
-export default async function Home() {
-  const articulos = await fetchArticulos();
-
-  // Datos estructurados (JSON-LD)
+  // 📌 Datos estructurados (JSON-LD)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -139,7 +71,11 @@ export default async function Home() {
           Explora los Mejores Artículos de Salud y Bienestar
         </h1>
 
-        {articulos.length > 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-600">Cargando artículos...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : articulos.length > 0 ? (
           <ArticulosRandom articulos={articulos} />
         ) : (
           <p className="text-center text-gray-600">
