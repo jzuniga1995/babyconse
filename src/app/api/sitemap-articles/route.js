@@ -11,7 +11,7 @@ export async function GET(request) {
     const query = `
       SELECT 
         id, title, slug, description, image, category, 
-        meta_keywords, meta_description, full_content, published_at, views
+       meta_description, full_content, published_at, views
       FROM articulos
       ORDER BY published_at DESC
     `;

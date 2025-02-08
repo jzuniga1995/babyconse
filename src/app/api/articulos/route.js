@@ -15,8 +15,7 @@ export async function GET(request) {
 
     let query = `
       SELECT 
-        id, title, slug, description, image, category, 
-        meta_keywords, meta_description, full_content, published_at, views
+        id, title, slug, description, image, category, meta_description, full_content, published_at, views
       FROM articulos
     `;
     let countQuery = `SELECT COUNT(*) as total FROM articulos`;
@@ -68,7 +67,6 @@ export async function POST(request) {
       image,
       category,
       full_content,
-      meta_keywords,
       meta_description,
       referencias,
     } = body;
@@ -100,8 +98,7 @@ export async function POST(request) {
 
     const [result] = await connection.query(
       `INSERT INTO articulos (
-        title, description, link, image, category, full_content, slug, 
-        meta_keywords, meta_description, published_at
+        title, description, link, image, category, full_content, slug,meta_description, published_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         title,
@@ -111,7 +108,6 @@ export async function POST(request) {
         category,
         full_content,
         slug,
-        meta_keywords || null,
         meta_description || null,
       ]
     );

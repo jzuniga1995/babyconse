@@ -52,8 +52,7 @@ export async function GET(request, context) {
     const [rows] = await connection.query(
       `SELECT 
          category AS name, 
-         meta_description, 
-         meta_keywords
+         meta_description
        FROM articulos
        WHERE LOWER(category) = ?
        LIMIT 1`,

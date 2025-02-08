@@ -30,7 +30,7 @@ export async function GET(request, context) {
     const [rows] = await connection.query(
       `SELECT 
          id, title, description, link, image, category, full_content, 
-         published_at, views, meta_keywords, meta_description
+         published_at, views,meta_description
        FROM articulos 
        WHERE slug = ?`,
       [slug]
