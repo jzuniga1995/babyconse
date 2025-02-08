@@ -1,5 +1,7 @@
+import { getConnection } from "../lib/db";
+
 export async function GET() {
-  // Rutas estáticas
+  // Rutas estáticas del sitio
   const staticUrls = [
     { url: "https://www.saludyser.com", lastModified: new Date().toISOString() },
     { url: "https://www.saludyser.com/contacto", lastModified: new Date().toISOString() },
@@ -9,44 +11,47 @@ export async function GET() {
     { url: "https://www.saludyser.com/nosotros", lastModified: new Date().toISOString() },
   ];
 
-  // Variables dinámicas para artículos y categorías
   let articles = [];
   let categories = [];
 
   // Normalizar slugs
-  function normalizeSlug(text) {
-    return text
+  const normalizeSlug = (text) =>
+    text
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "") // Remover tildes
-      .replace(/\s+/g, "-") // Reemplazar espacios por guiones
+      .replace(/\s+/g, "-") // Reemplazar espacios con guiones
       .replace(/[^\w\-]+/g, ""); // Eliminar caracteres no válidos
-  }
 
-  // Obtener artículos desde API
+  // Obtener artículos directamente desde la base de datos
   try {
-    const articlesRes = await fetch("https://www.saludyser.com/api/articulos");
-    if (!articlesRes.ok) throw new Error("Error al obtener artículos");
-    const articlesData = await articlesRes.json();
-    articles = articlesData.data || [];
+    const connection = await getConnection();
+    const articlesQuery = `
+      SELECT slug, published_at 
+      FROM articulos
+      ORDER BY published_at DESC
+    `;
+    const [articlesRows] = await connection.query(articlesQuery);
+    articles = articlesRows;
+    connection.release();
   } catch (error) {
     console.error("Error al cargar artículos:", error.message);
   }
 
-  // Obtener categorías desde API
+  // Obtener categorías desde API o estructura estática
   try {
     const categoriesRes = await fetch("https://www.saludyser.com/api/categorias");
     if (!categoriesRes.ok) throw new Error("Error al obtener categorías");
     const categoriesData = await categoriesRes.json();
     categories = Array.isArray(categoriesData) ? categoriesData : Object.values(categoriesData);
   } catch (error) {
-    console.error("Error al cargar categorías:", error.message);
+    console.error("Error al cargar categorías dinámicas:", error.message);
   }
 
   // Generar URLs dinámicas para artículos
   const articleUrls = articles.map((article) => ({
     url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
-    lastModified: new Date(article.updatedAt || article.published_at || new Date()).toISOString(),
+    lastModified: new Date(article.published_at || new Date()).toISOString(),
   }));
 
   // Generar URLs dinámicas para categorías
@@ -77,6 +82,7 @@ export async function GET() {
   return new Response(sitemap, {
     headers: {
       "Content-Type": "application/xml",
+      "Cache-Control": "public, max-age=0, s-maxage=3600, must-revalidate",
     },
   });
 }
