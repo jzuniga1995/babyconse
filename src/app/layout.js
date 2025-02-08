@@ -6,7 +6,7 @@ import Header from "./components/Header";
 import CookieConsent from "./components/CookieConsent";
 import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/react";
-import { usePathname } from "next/navigation"; // Hook recomendado para obtener la ruta
+import { usePathname } from "next/navigation";
 
 // Determinar si una ruta es especial basada en las props del componente
 function isSpecialRoute(pathname) {
@@ -28,11 +28,19 @@ function generateTitle(pathname) {
   }
 }
 
+// Rutas con meta descripción personalizada
+const pagesWithCustomDescription = ["/articulos", "/articulos/[slug]"];
+
 export default function RootLayout({ children }) {
   const pathname = usePathname(); // Usar el hook para obtener la ruta actual
   const specialRoute = isSpecialRoute(pathname);
 
   const title = generateTitle(pathname); // Generar título dinámico
+
+  // Incluir la meta descripción solo si no es una página con meta personalizada
+  const includeMetaDescription = !pagesWithCustomDescription.some((route) =>
+    pathname.startsWith(route)
+  );
 
   return (
     <html lang="es">
@@ -46,12 +54,13 @@ export default function RootLayout({ children }) {
         {/* Título dinámico */}
         <title>{title}</title>
 
-        {/* Meta */}
-        <meta charSet="UTF-8" />
-        <meta
-          name="description"
-          content="Explora guías y consejos prácticos sobre salud, bienestar físico y mental."
-        />
+        {/* Meta descripción solo si es necesario */}
+        {includeMetaDescription && (
+          <meta
+            name="description"
+            content="Explora guías y consejos prácticos sobre salud, bienestar físico y mental."
+          />
+        )}
       </head>
       <body className="bg-gray-50 font-sans">
         {!specialRoute && (
