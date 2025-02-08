@@ -9,7 +9,6 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
 
-  const isLoading = status === "loading";
   const user = session?.user;
 
   return (
@@ -39,13 +38,21 @@ export default function Header() {
           <Link href="/contacto" className="text-base md:text-lg hover:text-green-200 transition-all">
             Contacto
           </Link>
-          {isLoading ? (
-            <p className="text-base md:text-lg">Cargando...</p>
+
+          {status === "loading" ? (
+            <button
+              disabled
+              className="bg-white text-gray-500 font-semibold px-4 py-2 rounded-full cursor-not-allowed"
+            >
+              Cargando sesión...
+            </button>
           ) : user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm md:text-base text-green-200">Hola, {user.name}</span>
+              <span className="text-sm md:text-base text-green-200">
+                Hola, {user.name}
+              </span>
               <button
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: "/" })}
                 className="bg-white text-green-600 font-semibold px-4 py-2 rounded-full hover:bg-green-100 transition-all"
               >
                 Cerrar sesión
@@ -53,7 +60,7 @@ export default function Header() {
             </div>
           ) : (
             <button
-              onClick={() => signIn("google")}
+              onClick={() => signIn("google", { callbackUrl: window.location.href })}
               className="bg-white text-green-600 font-semibold px-4 py-2 rounded-full hover:bg-green-100 transition-all"
             >
               Iniciar sesión
@@ -88,7 +95,7 @@ export default function Header() {
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           user={user}
-          isLoading={isLoading}
+          isLoading={status === "loading"}
         />
       </div>
     </header>

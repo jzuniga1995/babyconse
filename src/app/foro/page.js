@@ -12,6 +12,12 @@ export default function Foro() {
 
   const user = session?.user;
 
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchPosts();
+    }
+  }, [status]); // Se ejecuta solo cuando el estado de la sesión cambia
+
   // Obtener publicaciones
   const fetchPosts = async () => {
     try {
@@ -145,32 +151,33 @@ export default function Foro() {
     }
   };
 
-  // Cargar publicaciones al inicio
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  // Muestra un mensaje de carga mientras se obtiene el estado de la sesión
+  if (status === "loading") {
+    return <p className="text-center mt-8">Cargando...</p>;
+  }
 
-  if (status === "loading") return <p className="text-center mt-8">Cargando...</p>;
-
-  if (!user)
+  // Si el usuario no está autenticado, redirigir a inicio de sesión
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-    <button
-  onClick={() => signIn("google", { callbackUrl: "/foro" })}
-  className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
->
-  Iniciar Sesión
-</button>
-
+        <button
+          onClick={() => signIn("google", { callbackUrl: "/foro" })}
+          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
+        >
+          Iniciar Sesión
+        </button>
       </div>
     );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <section className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Publicar sección */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Crea una nueva publicación</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Crea una nueva publicación
+          </h2>
           <textarea
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
@@ -191,7 +198,7 @@ export default function Foro() {
             <Post
               key={post.id}
               post={post}
-              handleLike={handleLike} // Pasar la función para manejar likes
+              handleLike={handleLike}
               fetchComments={fetchComments}
               commentsByPost={commentsByPost}
               setCommentsByPost={setCommentsByPost}

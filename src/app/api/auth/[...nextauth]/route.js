@@ -10,15 +10,15 @@ export const authOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      // Verificar si se proporciona un callbackUrl válido
-      return url.startsWith(baseUrl) ? url : baseUrl;
+    async session({ session, token }) {
+      session.user.id = token.sub; // Añade el ID del usuario al objeto de sesión
+      return session;
     },
   },
 };
 
-// Configuración de NextAuth
+// Exportar los manejadores de los métodos HTTP
 const handler = NextAuth(authOptions);
 
-// Exportar el manejador de NextAuth y las opciones de autenticación
-export { handler as GET, handler as POST };
+export const GET = handler;
+export const POST = handler;

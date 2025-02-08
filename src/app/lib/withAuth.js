@@ -1,19 +1,22 @@
-import { getSession } from "@auth0/nextjs-auth0";
+import { getSession } from "next-auth/react";
 
-export default function withAuth(handler) {
+/**
+ * Middleware para proteger rutas específicas.
+ */
+export function withAuth(handler) {
   return async (req, res) => {
-    // Excluir rutas específicas como sitemap.xml
+    // Permitir acceso sin autenticación a rutas específicas
     if (req.url === "/sitemap.xml") {
-      return handler(req, res); // Permitir acceso sin validación de sesión
+      return handler(req, res);
     }
 
-    const session = getSession(req, res);
+    const session = await getSession({ req });
 
     if (!session) {
       return res.status(401).json({ error: "No autorizado" });
     }
 
-    req.user = session.user; // Añade datos del usuario al request
+    req.user = session.user; // Adjuntar datos del usuario a la request
     return handler(req, res);
   };
 }
