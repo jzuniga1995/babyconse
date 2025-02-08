@@ -104,24 +104,25 @@ export default async function ArticuloDetallesPage({ params }) {
   }
 
   const structuredData = articulo
-    ? {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: articulo.title,
-        description: articulo.meta_description || articulo.description,
-        image: articulo.image || "/default-image.jpg",
-        author: {
-          "@type": "Person",
-          name: "Salud y Ser",
-        },
-        datePublished: articulo.published_at,
-        dateModified: articulo.updated_at,
-        mainEntityOfPage: {
-          "@type": "WebPage",
-          "@id": `${baseUrl}/articulos/${slug}`,
-        },
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": articulo.title,
+      "description": articulo.meta_description || articulo.description,
+      "image": articulo.image || "/default-image.jpg",
+      "author": {
+        "@type": "Person",
+        "name": "Salud y Ser",
+        "url": "https://www.saludyser.com/nosotros" 
+      },
+      "datePublished": articulo.published_at,
+      "dateModified": articulo.updated_at,
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `${baseUrl}/articulos/${slug}`
       }
-    : null;
+    }
+  : null;
 
   return (
     <section className="bg-gray-50 min-h-screen py-10 mt-16">
