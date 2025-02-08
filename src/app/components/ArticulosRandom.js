@@ -4,30 +4,31 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ArticulosRandom({ articulos }) {
+export default function ArticulosRandom() {
   const [randomArticles, setRandomArticles] = useState([]);
   const [featuredArticle, setFeaturedArticle] = useState(null);
 
-  const selectRandomArticles = () => {
-    if (articulos && articulos.length > 0) {
-      const shuffled = [...articulos].sort(() => 0.5 - Math.random());
-      setFeaturedArticle(shuffled[0]);
-      setRandomArticles(shuffled.slice(1, 10));
+  const fetchRandomArticles = async () => {
+    try {
+      const response = await fetch("/api/articulos/random");
+      if (!response.ok) throw new Error("Error al obtener artículos aleatorios.");
+      const data = await response.json();
+      if (data.articulos.length > 0) {
+        setFeaturedArticle(data.articulos[0]);
+        setRandomArticles(data.articulos.slice(1));
+      }
+    } catch (error) {
+      console.error(error.message);
     }
   };
 
   useEffect(() => {
-    if (!Array.isArray(articulos)) {
-      console.error("Prop 'articulos' no es un array:", articulos);
-      return;
-    }
-    selectRandomArticles();
+    fetchRandomArticles();
     const interval = setInterval(() => {
-      selectRandomArticles();
-    }, 60000);
-
+      fetchRandomArticles();
+    }, 60000); // Refrescar cada 60 segundos
     return () => clearInterval(interval);
-  }, [articulos]);
+  }, []);
 
   if (!featuredArticle || randomArticles.length === 0) {
     return <p className="text-center text-gray-600">No hay artículos disponibles.</p>;
