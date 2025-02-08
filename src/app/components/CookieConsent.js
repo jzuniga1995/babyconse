@@ -51,6 +51,9 @@ export default function CookieConsent() {
       aria-labelledby="cookieConsentHeading"
       aria-describedby="cookieConsentText"
     >
+      <h2 id="cookieConsentHeading" className="sr-only">
+        Preferencias de cookies
+      </h2>
       <p id="cookieConsentText" className="text-sm text-center sm:text-left">
         Este sitio utiliza cookies para mejorar tu experiencia. Al continuar navegando, aceptas nuestro{" "}
         <a href="/politica" className="underline text-green-400 hover:text-green-300">
