@@ -30,7 +30,7 @@ export async function generateMetadata() {
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
@@ -75,7 +75,7 @@ export default async function ArticulosPage() {
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     if (!response.ok) throw new Error("Error al obtener los artículos.");
 

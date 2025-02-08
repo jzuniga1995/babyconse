@@ -83,7 +83,7 @@ export default async function ArticuloDetallesPage({ params }) {
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     if (!response.ok) throw new Error("No se encontró el artículo.");
     const data = await response.json();

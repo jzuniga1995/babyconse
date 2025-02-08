@@ -53,7 +53,7 @@ export async function generateMetadata({ params }) {
     };
 
     const response = await fetch(`${baseUrl}/api/categorias/${categoriaSlug}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
 
     if (response.ok) {

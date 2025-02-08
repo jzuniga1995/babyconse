@@ -26,7 +26,7 @@ export default async function CategoriaPage({ params, searchParams }) {
   try {
     const response = await fetch(
       `${baseUrl}/api/articulos?category=${categoria}&limit=${limit}&offset=${offset}`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 60 } }
     );
 
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
