@@ -156,19 +156,21 @@ export default function Foro() {
     return <p className="text-center mt-8">Cargando...</p>;
   }
 
-  // Si el usuario no está autenticado, redirigir a inicio de sesión
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <button
-          onClick={() => signIn("google", { callbackUrl: "/foro" })}
-          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
-        >
-          Iniciar Sesión
-        </button>
-      </div>
-    );
-  }
+// Si el usuario no está autenticado, redirigir a inicio de sesión
+if (!user) {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <button
+        onClick={() => signIn("google", { callbackUrl: "/foro" })}
+        aria-label="Iniciar sesión con Google"
+        className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-transform transform hover:scale-105"
+      >
+        Iniciar Sesión
+      </button>
+    </div>
+  );
+}
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
