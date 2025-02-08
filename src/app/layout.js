@@ -28,19 +28,28 @@ function generateTitle(pathname) {
   }
 }
 
-// Rutas con meta descripción personalizada
-const pagesWithCustomDescription = ["/articulos", "/articulos/[slug]"];
+// Función para determinar si la página tiene una meta descripción personalizada
+function hasCustomMetaDescription(pathname) {
+  // Rutas dinámicas a considerar
+  const dynamicRoutes = ["/articulos/[slug]", "/categorias/[categoria]"];
+
+  // Verificar coincidencias
+  for (const route of dynamicRoutes) {
+    const routeBase = route.replace(/\[.*?\]/g, ""); // Remover dinámicos
+    if (pathname.startsWith(routeBase)) return true;
+  }
+
+  // Rutas estáticas
+  const staticRoutes = ["/articulos"];
+  return staticRoutes.includes(pathname);
+}
 
 export default function RootLayout({ children }) {
   const pathname = usePathname(); // Usar el hook para obtener la ruta actual
   const specialRoute = isSpecialRoute(pathname);
 
   const title = generateTitle(pathname); // Generar título dinámico
-
-  // Incluir la meta descripción solo si no es una página con meta personalizada
-  const includeMetaDescription = !pagesWithCustomDescription.some((route) =>
-    pathname.startsWith(route)
-  );
+  const includeMetaDescription = !hasCustomMetaDescription(pathname);
 
   return (
     <html lang="es">
