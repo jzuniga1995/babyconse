@@ -8,7 +8,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Base URL desde variable
 // 📌 Función para obtener artículos
 async function fetchArticulos() {
   try {
-    const response = await fetch(`${baseUrl}/api/articulos`, {
+    const response = await fetch(`${baseUrl}/api/articulos/random`, {
       next: { revalidate: 3600 },
     });
 
