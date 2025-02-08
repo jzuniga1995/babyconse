@@ -14,9 +14,25 @@ function isSpecialRoute(pathname) {
   return specialRoutes.includes(pathname);
 }
 
+// Función para generar el título dinámico
+function generateTitle(pathname) {
+  switch (pathname) {
+    case "/":
+      return "Inicio | Salud y Ser | Guías de Bienestar Físico y Mental";
+    case "/articulos":
+      return "Artículos | Salud y Ser | Información de Salud y Bienestar";
+    case "/contacto":
+      return "Contacto | Salud y Ser | Ponte en Contacto con Nosotros";
+    default:
+      return "Salud y Ser | Bienestar Físico y Mental";
+  }
+}
+
 export default function RootLayout({ children }) {
   const pathname = usePathname(); // Usar el hook para obtener la ruta actual
   const specialRoute = isSpecialRoute(pathname);
+
+  const title = generateTitle(pathname); // Generar título dinámico
 
   return (
     <html lang="es">
@@ -26,6 +42,9 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+        {/* Título dinámico */}
+        <title>{title}</title>
 
         {/* Meta */}
         <meta charSet="UTF-8" />
