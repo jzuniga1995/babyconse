@@ -2,16 +2,32 @@ import { query } from "../../../lib/db";
 
 export async function GET(req) {
   try {
-    const articulos = await query(
-      "SELECT id, title, slug, description, image, category FROM articulos ORDER BY RAND() LIMIT 10;"
-    );
+    // Obtener los IDs de todos los artículos
+    const idsResult = await query("SELECT id FROM articulos;");
+    const ids = idsResult.map((row) => row.id);
 
-    if (!articulos || articulos.length === 0) {
+    if (ids.length === 0) {
       return new Response(JSON.stringify({ error: "No se encontraron artículos." }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    // Seleccionar 10 IDs aleatorios
+    const randomIds = [];
+    while (randomIds.length < 10 && ids.length > 0) {
+      const randomIndex = Math.floor(Math.random() * ids.length);
+      randomIds.push(ids.splice(randomIndex, 1)[0]);
+    }
+
+    // Consultar los artículos correspondientes a los IDs seleccionados
+    const placeholders = randomIds.map(() => "?").join(", ");
+    const articulos = await query(
+      `SELECT id, title, slug, description, image, category
+       FROM articulos
+       WHERE id IN (${placeholders});`,
+      randomIds
+    );
 
     return new Response(JSON.stringify({ data: articulos }), {
       status: 200,
