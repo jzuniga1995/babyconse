@@ -33,7 +33,6 @@ export async function generateMetadata({ params }) {
 
     let metadata = {
       title: `Artículos sobre ${categoriaNombre} | Saludyser`,
-      description: `Explora los mejores artículos sobre ${categoriaNombre} en Saludyser.`,
       openGraph: {
         title: `Artículos sobre ${categoriaNombre} | Saludyser`,
         description: `Descubre artículos destacados sobre ${categoriaNombre}.`,
