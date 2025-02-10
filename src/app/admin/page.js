@@ -1,8 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function AdminForm() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  // Manejar autorización de usuario
+  useEffect(() => {
+    if (status === "loading") return; // Mientras carga, no hacer nada
+    if (!session || session.user.role !== "admin") {
+      router.push("/"); // Redirigir si no está autenticado o no es admin
+    } else {
+      setIsAuthorized(true); // Usuario autorizado
+    }
+  }, [status, session, router]);
+
+  // Estado del formulario
   const [form, setForm] = useState({
     title: '',
     slug: '',
@@ -84,6 +101,10 @@ export default function AdminForm() {
     }
   };
 
+  // Mostrar un mensaje de carga o redirigir antes de autorizar
+  if (!isAuthorized) {
+    return <p>Cargando...</p>;
+  }
   return (
     <div className="p-8 max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
