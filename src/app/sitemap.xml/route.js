@@ -48,15 +48,15 @@ export async function GET() {
     console.error("Error al cargar categorías dinámicas:", error.message);
   }
 
+  // Generar URLs dinámicas para artículos (incluyendo imágenes)
   const articleUrls = articles.map((article) => ({
     url: `https://www.saludyser.com/articulos/${encodeURIComponent(article.slug)}`,
     lastModified: new Date(article.published_at || new Date()).toISOString(),
     image: {
-      url: `https://www.saludyser.com/images/articulos/${article.image}`.replace("//", "/"),
+      url: `https://www.saludyser.com${article.image}`, // Usamos directamente la ruta almacenada
       title: article.title || "",
     },
   }));
-  
 
   // Generar URLs dinámicas para categorías
   const categoryUrls = categories.map((category) => ({
