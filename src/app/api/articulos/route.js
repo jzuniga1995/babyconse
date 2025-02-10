@@ -54,7 +54,6 @@ export async function GET(request) {
   }
 }
 
-// Manejar solicitudes POST para crear un nuevo artículo
 export async function POST(request) {
   let connection;
 
@@ -72,11 +71,12 @@ export async function POST(request) {
     } = body;
 
     if (!title || !description || !category || !full_content) {
+      console.error('Campos obligatorios faltantes:', { title, description, category, full_content });
       return new Response(
         JSON.stringify({
-          error: "El título, descripción, categoría y contenido son obligatorios.",
+          error: 'El título, descripción, categoría y contenido son obligatorios.',
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -85,21 +85,22 @@ export async function POST(request) {
     connection = await getConnection();
 
     const [existingSlug] = await connection.query(
-      "SELECT id FROM articulos WHERE slug = ?",
+      'SELECT id FROM articulos WHERE slug = ?',
       [slug]
     );
 
     if (existingSlug.length > 0) {
+      console.error('El slug ya existe:', slug);
       return new Response(
-        JSON.stringify({ error: "El slug generado ya existe. Intenta con otro título." }),
-        { status: 409, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ error: 'El slug generado ya existe. Intenta con otro título.' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const [result] = await connection.query(
       `INSERT INTO articulos (
-        title, description, link, image, category, full_content, slug,meta_description, published_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        title, description, link, image, category, full_content, slug, meta_description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         description,
@@ -121,27 +122,31 @@ export async function POST(request) {
         ref.link,
       ]);
 
+      const placeholders = referenciaQueries.map(() => '(?, ?, ?)').join(', ');
+      const flatValues = referenciaQueries.flat();
+
       await connection.query(
-        "INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ?",
-        [referenciaQueries]
+        `INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ${placeholders}`,
+        flatValues
       );
     }
 
+    console.log('Artículo y referencias creados con éxito.');
     return new Response(
-      JSON.stringify({ message: "Artículo creado con éxito", id: articuloId, slug }),
+      JSON.stringify({ message: 'Artículo creado con éxito', id: articuloId, slug }),
       {
         status: 201,
         headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store",
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       }
     );
   } catch (error) {
-    console.error("Error al crear el artículo:", error.message, error.stack);
+    console.error('Error al crear el artículo:', error.message, error.stack);
     return new Response(
-      JSON.stringify({ error: "Error al crear el artículo." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: 'Error al crear el artículo.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   } finally {
     if (connection) connection.release();
