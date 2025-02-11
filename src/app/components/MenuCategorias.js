@@ -7,7 +7,7 @@ import { generateSlug } from "../utils/slugify";
 // Definir categorías predeterminadas
 const defaultCategorias = [
   {
-    name: "Nutrición y Alimentación Saludable",
+    name: "Nutrición y Estilo de Vida Saludable",
     image: "/images/nutricion.jpg",
     bgColor: "bg-green-50",
     textColor: "text-green-800",
@@ -18,38 +18,16 @@ const defaultCategorias = [
     bgColor: "bg-blue-50",
     textColor: "text-blue-800",
   },
+
   {
-    name: "Salud Infantil y Familiar",
-    image: "/images/saludinfantil.jpg",
-    bgColor: "bg-purple-50",
-    textColor: "text-purple-800",
-  },
-  {
-    name: "Salud Mental y Emocional",
-    image: "/images/saludmental.jpg",
-    bgColor: "bg-yellow-50",
-    textColor: "text-yellow-800",
-  },
-  {
-    name: "Prevención y Cuidados Médicos",
+    name: "Prevención y Enfermedades",
     image: "/images/prevencion.jpg",
     bgColor: "bg-red-50",
     textColor: "text-red-800",
   },
+
   {
-    name: "Enfermedades Crónicas y Condiciones de Salud",
-    image: "/images/cronica.jpg",
-    bgColor: "bg-red-50",
-    textColor: "text-red-800",
-  },
-  {
-    name: "Estilo de Vida Saludable",
-    image: "/images/saludable.jpg",
-    bgColor: "bg-red-50",
-    textColor: "text-red-800",
-  },
-  {
-    name: "Salud y Tecnología",
+    name: "Salud Mental y Tecnología",
     image: "/images/smart.jpg",
     bgColor: "bg-red-50",
     textColor: "text-red-800",
