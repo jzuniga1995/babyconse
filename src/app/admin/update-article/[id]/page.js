@@ -19,13 +19,13 @@ export default function UpdateArticle() {
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/articles?id=${id}`)
+      fetch(`/api/articles/${id}`) // 🔴 Corregimos la URL de la API
         .then((res) => res.json())
         .then((data) => {
-          if (data.data) {
-            setArticle(data.data);
+          if (data.articulo) {
+            setArticle(data.articulo); // 🔴 Ahora tomamos `articulo`
           } else {
-            console.error("No se encontró el artículo");
+            console.error("No se encontró el artículo.");
           }
         })
         .catch((err) => console.error("Error al obtener el artículo:", err));
@@ -38,7 +38,7 @@ export default function UpdateArticle() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`/api/articles?id=${id}`, {
+    const response = await fetch(`/api/articles/${id}`, { // 🔴 Corregimos la URL de actualización
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(article),
@@ -55,68 +55,14 @@ export default function UpdateArticle() {
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Actualizar Artículo</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          value={article.title}
-          onChange={handleChange}
-          placeholder="Título"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="description"
-          value={article.description}
-          onChange={handleChange}
-          placeholder="Descripción"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="category"
-          value={article.category}
-          onChange={handleChange}
-          placeholder="Categoría"
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="text"
-          name="image"
-          value={article.image}
-          onChange={handleChange}
-          placeholder="URL de la imagen"
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          name="link"
-          value={article.link}
-          onChange={handleChange}
-          placeholder="Enlace externo (opcional)"
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          name="full_content"
-          value={article.full_content}
-          onChange={handleChange}
-          placeholder="Contenido completo del artículo"
-          className="w-full p-2 border rounded h-40"
-          required
-        />
-        <input
-          type="text"
-          name="meta_description"
-          value={article.meta_description}
-          onChange={handleChange}
-          placeholder="Meta descripción para SEO"
-          className="w-full p-2 border rounded"
-        />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-          Guardar Cambios
-        </button>
+        <input type="text" name="title" value={article.title} onChange={handleChange} placeholder="Título" className="w-full p-2 border rounded" required />
+        <input type="text" name="description" value={article.description} onChange={handleChange} placeholder="Descripción" className="w-full p-2 border rounded" required />
+        <input type="text" name="category" value={article.category} onChange={handleChange} placeholder="Categoría" className="w-full p-2 border rounded" required />
+        <input type="text" name="image" value={article.image} onChange={handleChange} placeholder="URL de la imagen" className="w-full p-2 border rounded" />
+        <input type="text" name="link" value={article.link} onChange={handleChange} placeholder="Enlace externo (opcional)" className="w-full p-2 border rounded" />
+        <textarea name="full_content" value={article.full_content} onChange={handleChange} placeholder="Contenido completo del artículo" className="w-full p-2 border rounded h-40" required />
+        <input type="text" name="meta_description" value={article.meta_description} onChange={handleChange} placeholder="Meta descripción para SEO" className="w-full p-2 border rounded" />
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded">Guardar Cambios</button>
       </form>
     </div>
   );
