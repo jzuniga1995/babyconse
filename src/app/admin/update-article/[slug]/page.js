@@ -48,10 +48,13 @@ export default function UpdateArticle() {
     });
 
     if (response.ok) {
-      router.push("/admin");
+      alert("✅ Artículo actualizado con éxito.");
+      setTimeout(() => router.push("/admin"), 1000); // 🔄 Pequeño delay antes de redirigir
     } else {
+      alert("❌ Error al actualizar el artículo. Inténtalo de nuevo.");
       console.error("Error al actualizar el artículo");
     }
+
     setIsSubmitting(false);
   };
 
