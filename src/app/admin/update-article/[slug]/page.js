@@ -2,16 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Loader2, Save } from "lucide-react";
 
 export default function UpdateArticle() {
   const router = useRouter();
   const { slug } = useParams(); // Obtenemos el slug desde la URL
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [article, setArticle] = useState({
     title: "",
@@ -25,7 +20,6 @@ export default function UpdateArticle() {
 
   useEffect(() => {
     if (slug) {
-      setLoading(true);
       fetch(`/api/articulos/${slug}`)
         .then((res) => res.json())
         .then((data) => {
@@ -35,8 +29,7 @@ export default function UpdateArticle() {
             console.error("No se encontró el artículo.");
           }
         })
-        .catch((err) => console.error("Error al obtener el artículo:", err))
-        .finally(() => setLoading(false));
+        .catch((err) => console.error("Error al obtener el artículo:", err));
     }
   }, [slug]);
 
@@ -46,7 +39,8 @@ export default function UpdateArticle() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
+
     const response = await fetch(`/api/articulos/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -58,86 +52,95 @@ export default function UpdateArticle() {
     } else {
       console.error("Error al actualizar el artículo");
     }
-    setLoading(false);
+    setIsSubmitting(false);
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <Card className="shadow-lg p-6">
-        <CardHeader>
-          <h1 className="text-3xl font-bold text-gray-800">Actualizar Artículo</h1>
-          <p className="text-gray-500">Modifica los datos del artículo y guarda los cambios.</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="text"
-                name="title"
-                value={article.title}
-                onChange={handleChange}
-                placeholder="Título"
-                className="w-full"
-                required
-              />
-              <Input
-                type="text"
-                name="category"
-                value={article.category}
-                onChange={handleChange}
-                placeholder="Categoría"
-                className="w-full"
-                required
-              />
-            </div>
-            <Input
-              type="text"
-              name="description"
-              value={article.description}
-              onChange={handleChange}
-              placeholder="Descripción"
-              className="w-full"
-              required
-            />
-            <Input
-              type="text"
-              name="image"
-              value={article.image}
-              onChange={handleChange}
-              placeholder="URL de la imagen"
-              className="w-full"
-            />
-            <Input
-              type="text"
-              name="link"
-              value={article.link}
-              onChange={handleChange}
-              placeholder="Enlace externo (opcional)"
-              className="w-full"
-            />
-            <Textarea
-              name="full_content"
-              value={article.full_content}
-              onChange={handleChange}
-              placeholder="Contenido completo del artículo"
-              className="w-full h-48"
-              required
-            />
-            <Input
-              type="text"
-              name="meta_description"
-              value={article.meta_description}
-              onChange={handleChange}
-              placeholder="Meta descripción para SEO"
-              className="w-full"
-            />
-            <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center gap-2" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" /> : <Save />}
-              {loading ? "Guardando..." : "Guardar Cambios"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+      <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Actualizar Artículo</h1>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Grid para organizar los campos */}
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="title"
+            value={article.title}
+            onChange={handleChange}
+            placeholder="Título"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+          <input
+            type="text"
+            name="category"
+            value={article.category}
+            onChange={handleChange}
+            placeholder="Categoría"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        <textarea
+          name="description"
+          value={article.description}
+          onChange={handleChange}
+          placeholder="Descripción breve"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          rows="3"
+          required
+        />
+
+        <input
+          type="text"
+          name="image"
+          value={article.image}
+          onChange={handleChange}
+          placeholder="URL de la imagen"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+
+        <input
+          type="text"
+          name="link"
+          value={article.link}
+          onChange={handleChange}
+          placeholder="Enlace externo (opcional)"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+
+        <textarea
+          name="full_content"
+          value={article.full_content}
+          onChange={handleChange}
+          placeholder="Contenido completo del artículo"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          rows="6"
+          required
+        />
+
+        <input
+          type="text"
+          name="meta_description"
+          value={article.meta_description}
+          onChange={handleChange}
+          placeholder="Meta descripción para SEO"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+
+        {/* Botón de Enviar */}
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600 flex items-center justify-center"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="animate-spin h-5 w-5 border-t-2 border-white rounded-full"></div>
+          ) : (
+            "Guardar Cambios"
+          )}
+        </button>
+      </form>
     </div>
   );
 }

@@ -3,11 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Trash2 } from "lucide-react";
 
 export default function AdminForm() {
   const { data: session, status } = useSession();
@@ -106,46 +101,116 @@ export default function AdminForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <Card className="shadow-lg p-6">
-        <CardHeader>
-          <h1 className="text-3xl font-bold text-gray-800">Crear Nuevo Artículo</h1>
-          <p className="text-gray-500">Completa los campos y publica un nuevo artículo.</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <Input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Título" required />
-              <Input type="text" name="slug" value={form.slug} onChange={handleChange} placeholder="Slug (URL amigable)" required />
-            </div>
-            <Textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción breve" rows="3" required />
-            <Input type="text" name="image" value={form.image} onChange={handleChange} placeholder="URL de la imagen" />
-            <Input type="text" name="category" value={form.category} onChange={handleChange} placeholder="Categoría" required />
-            <Textarea name="full_content" value={form.full_content} onChange={handleChange} placeholder="Contenido completo del artículo" rows="6" required />
-            <Textarea name="meta_description" value={form.meta_description} onChange={handleChange} placeholder="Meta descripción (SEO)" rows="2" />
+    <div className="max-w-4xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+      <h1 className="text-3xl font-bold text-gray-800 text-center">Crear Nuevo Artículo</h1>
+      <p className="text-gray-500 text-center mb-6">Completa los campos y publica un nuevo artículo.</p>
 
-            <div>
-              <h2 className="text-lg font-bold text-gray-700 mb-4">Referencias</h2>
-              {form.referencias.map((referencia, index) => (
-                <div key={index} className="flex items-center space-x-4 mb-4">
-                  <Input type="text" value={referencia.title} onChange={(e) => handleReferenciaChange(index, "title", e.target.value)} placeholder="Título de la referencia" />
-                  <Input type="text" value={referencia.link} onChange={(e) => handleReferenciaChange(index, "link", e.target.value)} placeholder="Enlace" />
-                  <Button type="button" variant="destructive" size="icon" onClick={() => removeReferencia(index)}>
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="outline" className="mt-2 flex items-center gap-2" onClick={addReferencia}>
-                <Plus size={16} /> Añadir Referencia
-              </Button>
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Título"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+          <input
+            type="text"
+            name="slug"
+            value={form.slug}
+            onChange={handleChange}
+            placeholder="Slug (URL amigable)"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
 
-            <Button type="submit" className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white" disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className="animate-spin" /> : "Publicar Artículo"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Descripción breve"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          rows="3"
+          required
+        />
+
+        <input
+          type="text"
+          name="image"
+          value={form.image}
+          onChange={handleChange}
+          placeholder="URL de la imagen"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+
+        <input
+          type="text"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          placeholder="Categoría"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          required
+        />
+
+        <textarea
+          name="full_content"
+          value={form.full_content}
+          onChange={handleChange}
+          placeholder="Contenido completo del artículo"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          rows="6"
+          required
+        />
+
+        <textarea
+          name="meta_description"
+          value={form.meta_description}
+          onChange={handleChange}
+          placeholder="Meta descripción (SEO)"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          rows="2"
+        />
+
+        <div>
+          <h2 className="text-lg font-bold text-gray-700 mb-4">Referencias</h2>
+          {form.referencias.map((referencia, index) => (
+            <div key={index} className="flex items-center space-x-4 mb-4">
+              <input
+                type="text"
+                value={referencia.title}
+                onChange={(e) => handleReferenciaChange(index, "title", e.target.value)}
+                placeholder="Título de la referencia"
+                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={referencia.link}
+                onChange={(e) => handleReferenciaChange(index, "link", e.target.value)}
+                placeholder="Enlace"
+                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => removeReferencia(index)}
+                className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
+              >
+                Eliminar
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addReferencia} className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+            Añadir Referencia
+          </button>
+        </div>
+
+        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600" disabled={isSubmitting}>
+          {isSubmitting ? "Enviando..." : "Publicar Artículo"}
+        </button>
+      </form>
     </div>
   );
 }
