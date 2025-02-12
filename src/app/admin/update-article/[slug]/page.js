@@ -19,11 +19,11 @@ export default function UpdateArticle() {
 
   useEffect(() => {
     if (slug) {
-      fetch(`/api/articles/${slug}`) // Usamos slug en lugar de id
+      fetch(`/api/articles/${slug}`) // 🔴 Usamos slug en lugar de id
         .then((res) => res.json())
         .then((data) => {
           if (data.articulo) {
-            setArticle(data.articulo);
+            setArticle(data.articulo); // 🔴 Aseguramos que toma `articulo`
           } else {
             console.error("No se encontró el artículo.");
           }
