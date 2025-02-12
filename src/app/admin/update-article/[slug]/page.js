@@ -19,7 +19,7 @@ export default function UpdateArticle() {
 
   useEffect(() => {
     if (slug) {
-      fetch(`/api/articles/${slug}`) // 🔴 Usamos slug en lugar de id
+      fetch(`/api/articulos/${slug}`) // 🔴 Usamos slug en lugar de id
         .then((res) => res.json())
         .then((data) => {
           if (data.articulo) {
@@ -38,7 +38,7 @@ export default function UpdateArticle() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`/api/articles/${slug}`, {
+    const response = await fetch(`/api/articulos/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(article),
