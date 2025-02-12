@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const articleId = searchParams.get("id"); // Obtiene el ID del artículo desde la URL
+  const { id } = useParams(); // Obtiene el ID del artículo desde la URL
 
   const [article, setArticle] = useState({
     title: "",
@@ -19,14 +18,19 @@ export default function UpdateArticle() {
   });
 
   useEffect(() => {
-    if (articleId) {
-      // Cargar datos del artículo desde el backend
-      fetch(`/api/articles?id=${articleId}`)
+    if (id) {
+      fetch(`/api/articles?id=${id}`)
         .then((res) => res.json())
-        .then((data) => setArticle(data.data)) // Asegurar que tomamos `data` correctamente
+        .then((data) => {
+          if (data.data) {
+            setArticle(data.data);
+          } else {
+            console.error("No se encontró el artículo");
+          }
+        })
         .catch((err) => console.error("Error al obtener el artículo:", err));
     }
-  }, [articleId]);
+  }, [id]);
 
   const handleChange = (e) => {
     setArticle({ ...article, [e.target.name]: e.target.value });
@@ -34,7 +38,7 @@ export default function UpdateArticle() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`/api/articles?id=${articleId}`, {
+    const response = await fetch(`/api/articles?id=${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(article),
