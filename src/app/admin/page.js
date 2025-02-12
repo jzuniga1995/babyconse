@@ -9,6 +9,7 @@ export default function AdminForm() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState({ message: "", type: "" }); // 🚀 Estado para las alertas
 
   useEffect(() => {
     if (status === "loading") return;
@@ -54,10 +55,15 @@ export default function AdminForm() {
     });
   };
 
+  const showAlert = (message, type) => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert({ message: "", type: "" }), 3000); // 🔥 Oculta la alerta después de 3s
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.slug || !form.description || !form.category || !form.full_content) {
-      alert("Por favor, completa todos los campos obligatorios.");
+      showAlert("⚠️ Todos los campos obligatorios deben ser completados.", "error");
       return;
     }
 
@@ -73,7 +79,7 @@ export default function AdminForm() {
       });
 
       if (response.ok) {
-        alert("Artículo creado con éxito.");
+        showAlert("✅ Artículo creado con éxito.", "success");
         setForm({
           title: "",
           slug: "",
@@ -86,11 +92,11 @@ export default function AdminForm() {
         });
       } else {
         const data = await response.json();
-        alert(`Error: ${data.error}`);
+        showAlert(`❌ Error: ${data.error}`, "error");
       }
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
-      alert("Ocurrió un error inesperado al enviar el formulario.");
+      showAlert("❌ Ocurrió un error inesperado.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,6 +110,17 @@ export default function AdminForm() {
     <div className="max-w-4xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 text-center">Crear Nuevo Artículo</h1>
       <p className="text-gray-500 text-center mb-6">Completa los campos y publica un nuevo artículo.</p>
+
+      {/* 🚀 Alertas visuales */}
+      {alert.message && (
+        <div
+          className={`p-3 mb-6 text-white rounded-lg text-center ${
+            alert.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
@@ -175,39 +192,11 @@ export default function AdminForm() {
           rows="2"
         />
 
-        <div>
-          <h2 className="text-lg font-bold text-gray-700 mb-4">Referencias</h2>
-          {form.referencias.map((referencia, index) => (
-            <div key={index} className="flex items-center space-x-4 mb-4">
-              <input
-                type="text"
-                value={referencia.title}
-                onChange={(e) => handleReferenciaChange(index, "title", e.target.value)}
-                placeholder="Título de la referencia"
-                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={referencia.link}
-                onChange={(e) => handleReferenciaChange(index, "link", e.target.value)}
-                placeholder="Enlace"
-                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => removeReferencia(index)}
-                className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
-              >
-                Eliminar
-              </button>
-            </div>
-          ))}
-          <button type="button" onClick={addReferencia} className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-            Añadir Referencia
-          </button>
-        </div>
-
-        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600" disabled={isSubmitting}>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Enviando..." : "Publicar Artículo"}
         </button>
       </form>
