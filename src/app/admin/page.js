@@ -1,41 +1,42 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 
 export default function AdminForm() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Manejar autorización de usuario
   useEffect(() => {
-    if (status === "loading") return; // Mientras carga, no hacer nada
+    if (status === "loading") return;
     if (!session || session.user.role !== "admin") {
-      router.push("/"); // Redirigir si no está autenticado o no es admin
+      router.push("/");
     } else {
-      setIsAuthorized(true); // Usuario autorizado
+      setIsAuthorized(true);
     }
   }, [status, session, router]);
 
-  // Estado del formulario
   const [form, setForm] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    image: '',
-    category: '',
-    full_content: '',
-    meta_description: '',
-    referencias: [{ title: '', link: '' }],
+    title: "",
+    slug: "",
+    description: "",
+    image: "",
+    category: "",
+    full_content: "",
+    meta_description: "",
+    referencias: [{ title: "", link: "" }],
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleReferenciaChange = (index, field, value) => {
@@ -47,216 +48,104 @@ export default function AdminForm() {
   const addReferencia = () => {
     setForm({
       ...form,
-      referencias: [...form.referencias, { title: '', link: '' }],
+      referencias: [...form.referencias, { title: "", link: "" }],
     });
   };
 
   const removeReferencia = (index) => {
-    const updatedReferencias = form.referencias.filter((_, i) => i !== index);
-    setForm({ ...form, referencias: updatedReferencias });
+    setForm({
+      ...form,
+      referencias: form.referencias.filter((_, i) => i !== index),
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.title || !form.slug || !form.description || !form.category || !form.full_content) {
-      alert('Por favor, completa todos los campos obligatorios.');
+      alert("Por favor, completa todos los campos obligatorios.");
       return;
     }
 
-    const referenciasFiltradas = form.referencias.filter(
-      (ref) => ref.title.trim() !== '' && ref.link.trim() !== ''
-    );
-
     setIsSubmitting(true);
-
     try {
-      const response = await fetch('/api/articulos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, referencias: referenciasFiltradas }),
+      const response = await fetch("/api/articulos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          referencias: form.referencias.filter((ref) => ref.title.trim() !== "" && ref.link.trim() !== ""),
+        }),
       });
-      const data = await response.json();
 
       if (response.ok) {
-        alert('Artículo creado con éxito.');
+        alert("Artículo creado con éxito.");
         setForm({
-          title: '',
-          slug: '',
-          description: '',
-          image: '',
-          category: '',
-          full_content: '',
-          meta_description: '',
-          referencias: [{ title: '', link: '' }],
+          title: "",
+          slug: "",
+          description: "",
+          image: "",
+          category: "",
+          full_content: "",
+          meta_description: "",
+          referencias: [{ title: "", link: "" }],
         });
       } else {
+        const data = await response.json();
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Error al enviar el formulario:', error);
-      alert('Ocurrió un error inesperado al enviar el formulario.');
+      console.error("Error al enviar el formulario:", error);
+      alert("Ocurrió un error inesperado al enviar el formulario.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Mostrar un mensaje de carga o redirigir antes de autorizar
   if (!isAuthorized) {
-    return <p>Cargando...</p>;
+    return <p className="text-center mt-10">Cargando...</p>;
   }
+
   return (
-    <div className="p-8 max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        Crear Nuevo Artículo
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Título */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Título del artículo*</label>
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Escribe el título del artículo"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          />
-        </div>
-
-        {/* Slug */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Slug (URL amigable)*</label>
-          <input
-            name="slug"
-            value={form.slug}
-            onChange={handleChange}
-            placeholder="Ejemplo: beneficios-del-agua"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          />
-        </div>
-
-        {/* Descripción breve */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Descripción breve*</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Escribe una breve descripción del artículo"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            rows="3"
-            required
-          />
-        </div>
-
-        {/* Imagen */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">URL de la imagen*</label>
-          <input
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            placeholder="URL de la imagen principal del artículo"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
-
-        {/* Categoría */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Categoría*</label>
-          <input
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            placeholder="Categoría del artículo (e.g., Nutrición)"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          />
-        </div>
-
-        {/* Contenido completo */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Contenido completo*</label>
-          <textarea
-            name="full_content"
-            value={form.full_content}
-            onChange={handleChange}
-            placeholder="Escribe el contenido completo del artículo"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            rows="6"
-            required
-          />
-        </div>
-
-        {/* Meta descripción */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Meta descripción (SEO)</label>
-          <textarea
-            name="meta_description"
-            value={form.meta_description}
-            onChange={handleChange}
-            placeholder="Escribe una meta descripción para SEO"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            rows="2"
-          />
-        </div>
-
-        {/* Referencias */}
-        <div>
-          <h2 className="text-lg font-bold text-gray-700 mb-4">Referencias (opcional)</h2>
-          {form.referencias.map((referencia, index) => (
-            <div key={index} className="flex items-center space-x-4 mb-4">
-              <input
-                type="text"
-                value={referencia.title}
-                onChange={(e) =>
-                  handleReferenciaChange(index, 'title', e.target.value)
-                }
-                placeholder="Título de la referencia"
-                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={referencia.link}
-                onChange={(e) =>
-                  handleReferenciaChange(index, 'link', e.target.value)
-                }
-                placeholder="Enlace de la referencia"
-                className="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => removeReferencia(index)}
-                className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
-              >
-                Eliminar
-              </button>
+    <div className="max-w-4xl mx-auto mt-10">
+      <Card className="shadow-lg p-6">
+        <CardHeader>
+          <h1 className="text-3xl font-bold text-gray-800">Crear Nuevo Artículo</h1>
+          <p className="text-gray-500">Completa los campos y publica un nuevo artículo.</p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <Input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Título" required />
+              <Input type="text" name="slug" value={form.slug} onChange={handleChange} placeholder="Slug (URL amigable)" required />
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={addReferencia}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-          >
-            Añadir Referencia
-          </button>
-        </div>
+            <Textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción breve" rows="3" required />
+            <Input type="text" name="image" value={form.image} onChange={handleChange} placeholder="URL de la imagen" />
+            <Input type="text" name="category" value={form.category} onChange={handleChange} placeholder="Categoría" required />
+            <Textarea name="full_content" value={form.full_content} onChange={handleChange} placeholder="Contenido completo del artículo" rows="6" required />
+            <Textarea name="meta_description" value={form.meta_description} onChange={handleChange} placeholder="Meta descripción (SEO)" rows="2" />
 
-        {/* Botón de envío */}
-        <button
-          type="submit"
-          className={`w-full text-white px-4 py-3 rounded-lg text-lg font-semibold ${
-            isSubmitting
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Enviando...' : 'Publicar Artículo'}
-        </button>
-      </form>
+            <div>
+              <h2 className="text-lg font-bold text-gray-700 mb-4">Referencias</h2>
+              {form.referencias.map((referencia, index) => (
+                <div key={index} className="flex items-center space-x-4 mb-4">
+                  <Input type="text" value={referencia.title} onChange={(e) => handleReferenciaChange(index, "title", e.target.value)} placeholder="Título de la referencia" />
+                  <Input type="text" value={referencia.link} onChange={(e) => handleReferenciaChange(index, "link", e.target.value)} placeholder="Enlace" />
+                  <Button type="button" variant="destructive" size="icon" onClick={() => removeReferencia(index)}>
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" className="mt-2 flex items-center gap-2" onClick={addReferencia}>
+                <Plus size={16} /> Añadir Referencia
+              </Button>
+            </div>
+
+            <Button type="submit" className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="animate-spin" /> : "Publicar Artículo"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
