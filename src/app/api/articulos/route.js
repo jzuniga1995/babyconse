@@ -123,11 +123,11 @@ export async function PUT(request) {
   let connection;
   try {
     const url = new URL(request.url);
-    const id = url.searchParams.get("id");
+    const slug = url.pathname.split("/").pop(); // ✅ Obtener slug desde la URL
 
-    if (!id) {
+    if (!slug) {
       return new Response(
-        JSON.stringify({ error: "El ID del artículo es obligatorio." }),
+        JSON.stringify({ error: "El slug del artículo es obligatorio." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -142,18 +142,28 @@ export async function PUT(request) {
       );
     }
 
-    const slug = generateSlug(title);
     connection = await getConnection();
+
+    const [existingArticle] = await connection.query(
+      `SELECT id FROM articulos WHERE slug = ?`, [slug]
+    );
+
+    if (existingArticle.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Artículo no encontrado." }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     await connection.query(
       `UPDATE articulos 
-       SET title = ?, description = ?, link = ?, image = ?, category = ?, full_content = ?, slug = ?, meta_description = ? 
-       WHERE id = ?`,
-      [title, description, link || null, image || null, category, full_content, slug, meta_description || null, id]
+       SET title = ?, description = ?, link = ?, image = ?, category = ?, full_content = ?, meta_description = ?
+       WHERE slug = ?`,
+      [title, description, link || null, image || null, category, full_content, meta_description || null, slug]
     );
 
     return new Response(
-      JSON.stringify({ message: "Artículo actualizado con éxito", id }),
+      JSON.stringify({ message: "Artículo actualizado con éxito", slug }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
