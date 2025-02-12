@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
   const router = useRouter();
-  const { id } = useParams(); // Obtiene el ID del artículo desde la URL
+  const { slug } = useParams(); // Obtenemos el slug desde la URL
 
   const [article, setArticle] = useState({
     title: "",
@@ -18,19 +18,19 @@ export default function UpdateArticle() {
   });
 
   useEffect(() => {
-    if (id) {
-      fetch(`/api/articles/${id}`) // 🔴 Corregimos la URL de la API
+    if (slug) {
+      fetch(`/api/articles/${slug}`) // Usamos slug en lugar de id
         .then((res) => res.json())
         .then((data) => {
           if (data.articulo) {
-            setArticle(data.articulo); // 🔴 Ahora tomamos `articulo`
+            setArticle(data.articulo);
           } else {
             console.error("No se encontró el artículo.");
           }
         })
         .catch((err) => console.error("Error al obtener el artículo:", err));
     }
-  }, [id]);
+  }, [slug]);
 
   const handleChange = (e) => {
     setArticle({ ...article, [e.target.name]: e.target.value });
@@ -38,14 +38,14 @@ export default function UpdateArticle() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`/api/articles/${id}`, { // 🔴 Corregimos la URL de actualización
+    const response = await fetch(`/api/articles/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(article),
     });
 
     if (response.ok) {
-      router.push("/admin"); // Redirige al dashboard después de actualizar
+      router.push("/admin");
     } else {
       console.error("Error al actualizar el artículo");
     }
