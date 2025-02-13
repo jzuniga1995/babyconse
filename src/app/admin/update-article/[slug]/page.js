@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
   const router = useRouter();
-  const { slug } = useParams(); // Obtenemos el slug desde la URL
+  const { slug } = useParams(); 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [article, setArticle] = useState({
@@ -37,32 +37,36 @@ export default function UpdateArticle() {
     setArticle({ ...article, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, append = false) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const response = await fetch(`/api/articulos/${slug}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(article),
-    });
+    try {
+      const response = await fetch(`/api/articulos/${slug}?append=${append}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(article),
+      });
 
-    if (response.ok) {
-      alert("✅ Artículo actualizado con éxito.");
-      setTimeout(() => router.push("/admin"), 1000); // 🔄 Pequeño delay antes de redirigir
-    } else {
-      alert("❌ Error al actualizar el artículo. Inténtalo de nuevo.");
-      console.error("Error al actualizar el artículo");
+      if (response.ok) {
+        alert("Artículo actualizado correctamente.");
+        router.push("/admin");
+      } else {
+        console.error("Error al actualizar el artículo.");
+        alert("Error al actualizar el artículo.");
+      }
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      alert("Hubo un error al actualizar el artículo.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Actualizar Artículo</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Grid para organizar los campos */}
+      <form className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <input
             type="text"
@@ -116,7 +120,7 @@ export default function UpdateArticle() {
           name="full_content"
           value={article.full_content}
           onChange={handleChange}
-          placeholder="Contenido completo del artículo"
+          placeholder="Añadir nuevo contenido"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           rows="6"
           required
@@ -131,18 +135,25 @@ export default function UpdateArticle() {
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
 
-        {/* Botón de Enviar */}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600 flex items-center justify-center"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <div className="animate-spin h-5 w-5 border-t-2 border-white rounded-full"></div>
-          ) : (
-            "Guardar Cambios"
-          )}
-        </button>
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e, false)}
+            className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-red-600"
+            disabled={isSubmitting}
+          >
+            Reemplazar Contenido
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e, true)}
+            className="flex-1 bg-green-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-green-600"
+            disabled={isSubmitting}
+          >
+            Agregar Contenido
+          </button>
+        </div>
       </form>
     </div>
   );

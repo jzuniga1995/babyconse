@@ -124,6 +124,7 @@ export async function PUT(request) {
   try {
     const url = new URL(request.url);
     const slug = url.pathname.split("/").pop(); // ✅ Obtener slug desde la URL
+    const append = url.searchParams.get("append") === "true"; // 🆕 Determinar si debemos agregar contenido
 
     if (!slug) {
       return new Response(
@@ -144,22 +145,32 @@ export async function PUT(request) {
 
     connection = await getConnection();
 
-    const [existingArticle] = await connection.query(
-      `SELECT id FROM articulos WHERE slug = ?`, [slug]
-    );
-
-    if (existingArticle.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Artículo no encontrado." }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
+    // Obtener el contenido actual si `append=true`
+    let contenidoExistente = "";
+    if (append) {
+      const [existingArticle] = await connection.query(
+        `SELECT full_content FROM articulos WHERE slug = ?`,
+        [slug]
       );
+
+      if (existingArticle.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Artículo no encontrado." }),
+          { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      contenidoExistente = existingArticle[0].full_content || "";
     }
+
+    // 📌 Si `append=true`, concatenamos el nuevo contenido; si no, lo reemplazamos
+    const contenidoFinal = append ? `${contenidoExistente}\n\n${full_content}` : full_content;
 
     await connection.query(
       `UPDATE articulos 
        SET title = ?, description = ?, link = ?, image = ?, category = ?, full_content = ?, meta_description = ?
        WHERE slug = ?`,
-      [title, description, link || null, image || null, category, full_content, meta_description || null, slug]
+      [title, description, link || null, image || null, category, contenidoFinal, meta_description || null, slug]
     );
 
     return new Response(
