@@ -1,21 +1,28 @@
 import { getConnection } from "../../lib/db";
 import { generateSlug } from "../../utils/slugify";
 
-// Obtener artículos con paginación (GET)
+// Función para manejar errores de respuesta
+const errorResponse = (message, status = 500) => {
+  console.error(`❌ ERROR ${status}: ${message}`);
+  return new Response(
+    JSON.stringify({ error: message }),
+    { status, headers: { "Content-Type": "application/json" } }
+  );
+};
+
+// ✅ Obtener artículos con paginación (GET)
 export async function GET(request) {
   let connection;
   try {
     connection = await getConnection();
+    console.log("✅ Conectado a la base de datos para obtener artículos.");
+
     const url = new URL(request.url);
     const category = url.searchParams.get("category");
     const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit"), 10) || 10, 1), 100);
     const offset = Math.max(parseInt(url.searchParams.get("offset"), 10) || 0, 0);
 
-    let query = `
-      SELECT 
-        id, title, slug, description, image, category, meta_description, full_content, published_at, views
-      FROM articulos
-    `;
+    let query = `SELECT id, title, slug, description, image, category, meta_description, full_content, published_at, views FROM articulos`;
     let countQuery = `SELECT COUNT(*) as total FROM articulos`;
     const queryParams = [];
 
@@ -35,136 +42,105 @@ export async function GET(request) {
       JSON.stringify({ data: rows, total: totalRows[0]?.total || 0 }),
       {
         status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Error al obtener los artículos:", error.message, error.stack);
-    return new Response(
-      JSON.stringify({ error: "Error interno del servidor." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return errorResponse("Error interno al obtener artículos.");
   } finally {
     if (connection) connection.release();
   }
 }
 
-// Crear un nuevo artículo (POST)
+// ✅ Crear un nuevo artículo (POST)
 export async function POST(request) {
   let connection;
   try {
     const body = await request.json();
+    console.log("📩 Datos recibidos:", body);
+
     const { title, description, link, image, category, full_content, meta_description, referencias } = body;
 
-    if (!title || !description || !category || !full_content) {
-      return new Response(
-        JSON.stringify({ error: "El título, descripción, categoría y contenido son obligatorios." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+    // 🔍 Validación estricta de datos
+    if (![title, description, category, full_content].every(field => field?.trim())) {
+      return errorResponse("El título, descripción, categoría y contenido son obligatorios.", 400);
     }
 
     const slug = generateSlug(title);
     connection = await getConnection();
+    console.log("✅ Conectado a la base de datos para crear artículo.");
 
-    const [existingSlug] = await connection.query('SELECT id FROM articulos WHERE slug = ?', [slug]);
+    // Verificar si el slug ya existe
+    const [existingSlug] = await connection.query("SELECT id FROM articulos WHERE slug = ?", [slug]);
     if (existingSlug.length > 0) {
-      return new Response(
-        JSON.stringify({ error: "El slug generado ya existe. Intenta con otro título." }),
-        { status: 409, headers: { "Content-Type": "application/json" } }
-      );
+      return errorResponse("El slug generado ya existe. Intenta con otro título.", 409);
     }
 
+    // Insertar artículo
     const [result] = await connection.query(
-      `INSERT INTO articulos (
-        title, description, link, image, category, full_content, slug, meta_description
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO articulos (title, description, link, image, category, full_content, slug, meta_description) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [title, description, link || null, image || null, category, full_content, slug, meta_description || null]
     );
 
     const articuloId = result.insertId;
+    console.log(`✅ Artículo creado con ID: ${articuloId}`);
 
+    // Insertar referencias (si existen)
     if (Array.isArray(referencias) && referencias.length > 0) {
-      const referenciaQueries = referencias.map((ref) => [articuloId, ref.title, ref.link]);
-      const placeholders = referenciaQueries.map(() => '(?, ?, ?)').join(', ');
+      const referenciaQueries = referencias.map(ref => [articuloId, ref.title, ref.link]);
+      const placeholders = referenciaQueries.map(() => "(?, ?, ?)").join(", ");
       const flatValues = referenciaQueries.flat();
 
-      await connection.query(
-        `INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ${placeholders}`,
-        flatValues
-      );
+      await connection.query(`INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ${placeholders}`, flatValues);
     }
 
     return new Response(
       JSON.stringify({ message: "Artículo creado con éxito", id: articuloId, slug }),
-      {
-        status: 201,
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store",
-        },
-      }
+      { status: 201, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error al crear el artículo:", error.message, error.stack);
-    return new Response(
-      JSON.stringify({ error: "Error al crear el artículo." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return errorResponse("Error al crear el artículo.");
   } finally {
     if (connection) connection.release();
   }
 }
 
-// Actualizar un artículo existente (PUT)
+// ✅ Actualizar un artículo existente (PUT)
 export async function PUT(request) {
   let connection;
   try {
     const url = new URL(request.url);
-    const slug = url.pathname.split("/").pop(); // ✅ Obtener slug desde la URL
-    const append = url.searchParams.get("append") === "true"; // 🆕 Determinar si debemos agregar contenido
+    const slug = url.pathname.split("/").pop();
+    const append = url.searchParams.get("append") === "true";
 
     if (!slug) {
-      return new Response(
-        JSON.stringify({ error: "El slug del artículo es obligatorio." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return errorResponse("El slug del artículo es obligatorio.", 400);
     }
 
     const body = await request.json();
+    console.log("📩 Datos recibidos para actualización:", body);
+
     const { title, description, link, image, category, full_content, meta_description } = body;
 
-    if (!title || !description || !category || !full_content) {
-      return new Response(
-        JSON.stringify({ error: "Todos los campos son obligatorios." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+    if (![title, description, category, full_content].every(field => field?.trim())) {
+      return errorResponse("Todos los campos son obligatorios.", 400);
     }
 
     connection = await getConnection();
+    console.log("✅ Conectado a la base de datos para actualizar artículo.");
 
-    // Obtener el contenido actual si `append=true`
-    let contenidoExistente = "";
+    let contenidoFinal = full_content;
+
     if (append) {
-      const [existingArticle] = await connection.query(
-        `SELECT full_content FROM articulos WHERE slug = ?`,
-        [slug]
-      );
+      const [existingArticle] = await connection.query("SELECT full_content FROM articulos WHERE slug = ?", [slug]);
 
       if (existingArticle.length === 0) {
-        return new Response(
-          JSON.stringify({ error: "Artículo no encontrado." }),
-          { status: 404, headers: { "Content-Type": "application/json" } }
-        );
+        return errorResponse("Artículo no encontrado.", 404);
       }
 
-      contenidoExistente = existingArticle[0].full_content || "";
+      contenidoFinal = `${existingArticle[0].full_content}\n\n${full_content}`;
     }
-
-    // 📌 Si `append=true`, concatenamos el nuevo contenido; si no, lo reemplazamos
-    const contenidoFinal = append ? `${contenidoExistente}\n\n${full_content}` : full_content;
 
     await connection.query(
       `UPDATE articulos 
@@ -173,16 +149,14 @@ export async function PUT(request) {
       [title, description, link || null, image || null, category, contenidoFinal, meta_description || null, slug]
     );
 
+    console.log(`✅ Artículo actualizado con slug: ${slug}`);
+
     return new Response(
       JSON.stringify({ message: "Artículo actualizado con éxito", slug }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error al actualizar el artículo:", error.message, error.stack);
-    return new Response(
-      JSON.stringify({ error: "Error al actualizar el artículo." }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return errorResponse("Error al actualizar el artículo.");
   } finally {
     if (connection) connection.release();
   }
