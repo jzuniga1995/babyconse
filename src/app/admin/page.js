@@ -9,7 +9,7 @@ export default function AdminForm() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [alert, setAlert] = useState({ message: "", type: "" }); // 🚀 Estado para las alertas
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
   useEffect(() => {
     if (status === "loading") return;
@@ -57,26 +57,50 @@ export default function AdminForm() {
 
   const showAlert = (message, type) => {
     setAlert({ message, type });
-    setTimeout(() => setAlert({ message: "", type: "" }), 3000); // 🔥 Oculta la alerta después de 3s
+    setTimeout(() => setAlert({ message: "", type: "" }), 3000);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.title || !form.slug || !form.description || !form.category || !form.full_content) {
+
+    // Validaciones de datos
+    if (!form.title.trim() || !form.slug.trim() || !form.description.trim() || 
+        !form.category.trim() || !form.full_content.trim()) {
       showAlert("⚠️ Todos los campos obligatorios deben ser completados.", "error");
       return;
     }
 
     setIsSubmitting(true);
+
+    // Log para depuración
+    console.log("📩 Enviando datos:", JSON.stringify({
+      title: form.title.trim(),
+      slug: form.slug.trim(),
+      description: form.description.trim(),
+      image: form.image.trim() || null,
+      category: form.category.trim(),
+      full_content: form.full_content.trim(),
+      meta_description: form.meta_description.trim() || null,
+      referencias: form.referencias.filter(ref => ref.title.trim() && ref.link.trim()),
+    }, null, 2));
+
     try {
       const response = await fetch("/api/articulos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
-          referencias: form.referencias.filter((ref) => ref.title.trim() !== "" && ref.link.trim() !== ""),
+          title: form.title.trim(),
+          slug: form.slug.trim(),
+          description: form.description.trim(),
+          image: form.image.trim() || null,
+          category: form.category.trim(),
+          full_content: form.full_content.trim(),
+          meta_description: form.meta_description.trim() || null,
+          referencias: form.referencias.filter(ref => ref.title.trim() && ref.link.trim()),
         }),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         showAlert("✅ Artículo creado con éxito.", "success");
@@ -91,12 +115,11 @@ export default function AdminForm() {
           referencias: [{ title: "", link: "" }],
         });
       } else {
-        const data = await response.json();
-        showAlert(`❌ Error: ${data.error}`, "error");
+        showAlert(`❌ Error: ${data.error || "Error desconocido"}`, "error");
       }
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
-      showAlert("❌ Ocurrió un error inesperado.", "error");
+      console.error("❌ Error en la solicitud:", error);
+      showAlert("❌ Error en la conexión con el servidor.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,17 +130,12 @@ export default function AdminForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8 ">
+    <div className="max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 text-center">Crear Nuevo Artículo</h1>
       <p className="text-gray-500 text-center mb-6">Completa los campos y publica un nuevo artículo.</p>
 
-      {/* 🚀 Alertas visuales */}
       {alert.message && (
-        <div
-          className={`p-3 mb-6 text-white rounded-lg text-center ${
-            alert.type === "success" ? "bg-green-500" : "bg-red-500"
-          }`}
-        >
+        <div className={`p-3 mb-6 text-white rounded-lg text-center ${alert.type === "success" ? "bg-green-500" : "bg-red-500"}`}>
           {alert.message}
         </div>
       )}
