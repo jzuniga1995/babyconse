@@ -34,10 +34,10 @@ export default function Pagination({ page, pages, onPageChange }) {
         <button
           key={pageNumber}
           onClick={() => onPageChange(pageNumber)}
-          className={`px-3 py-2 text-sm sm:text-base md:text-lg rounded-md font-medium transition-all duration-300 shadow-md border ${
+          className={`px-3 py-2 text-sm sm:text-base rounded-md font-medium transition-all duration-300 shadow-md border ${
             page === pageNumber
               ? "bg-blue-500 text-white border-blue-500"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-200"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
           }`}
           aria-current={page === pageNumber ? "page" : undefined}
           aria-label={`Ir a la página ${pageNumber}`}
@@ -51,14 +51,14 @@ export default function Pagination({ page, pages, onPageChange }) {
   return (
     <nav className="flex flex-col items-center mt-6 w-full px-4" aria-label="Paginación">
       {/* Logo personalizado */}
-      <div className="text-lg sm:text-2xl font-bold text-gray-800 mb-4">SALUDYSER</div>
+      <div className="text-lg sm:text-2xl font-bold text-gray-800 mb-4 text-center">SALUDYSER</div>
 
-      <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4">
+      <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 w-full max-w-xs">
         {/* Botón Anterior */}
         <button
           onClick={handlePrevious}
           disabled={page <= 1}
-          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-24 justify-center ${
+          className={`px-4 py-2 text-sm sm:text-base rounded-md font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-full sm:w-auto justify-center ${
             page > 1
               ? "bg-blue-500 text-white hover:bg-blue-600"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -70,13 +70,13 @@ export default function Pagination({ page, pages, onPageChange }) {
         </button>
 
         {/* Números de página */}
-        <div className="flex gap-1">{renderPageNumbers}</div>
+        <div className="flex gap-1 w-full justify-center">{renderPageNumbers}</div>
 
         {/* Botón Siguiente */}
         <button
           onClick={handleNext}
           disabled={page >= pages}
-          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-24 justify-center ${
+          className={`px-4 py-2 text-sm sm:text-base rounded-md font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-full sm:w-auto justify-center ${
             page < pages
               ? "bg-blue-500 text-white hover:bg-blue-600"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
