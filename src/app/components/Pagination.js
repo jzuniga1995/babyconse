@@ -49,16 +49,16 @@ export default function Pagination({ page, pages, onPageChange }) {
   }, [page, pages, onPageChange]);
 
   return (
-    <nav className="flex flex-col items-center mt-6 w-full" aria-label="Paginación">
+    <nav className="flex flex-col items-center mt-6 w-full px-4" aria-label="Paginación">
       {/* Logo personalizado */}
-      <div className="text-xl sm:text-3xl font-bold text-gray-800 mb-4">SALUDYSER</div>
+      <div className="text-lg sm:text-2xl font-bold text-gray-800 mb-4">SALUDYSER</div>
 
       <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4">
         {/* Botón Anterior */}
         <button
           onClick={handlePrevious}
           disabled={page <= 1}
-          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 ${
+          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-24 justify-center ${
             page > 1
               ? "bg-blue-500 text-white hover:bg-blue-600"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -70,13 +70,13 @@ export default function Pagination({ page, pages, onPageChange }) {
         </button>
 
         {/* Números de página */}
-        {renderPageNumbers}
+        <div className="flex gap-1">{renderPageNumbers}</div>
 
         {/* Botón Siguiente */}
         <button
           onClick={handleNext}
           disabled={page >= pages}
-          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 ${
+          className={`px-4 py-2 text-sm sm:text-base rounded-full font-medium transition-all duration-300 shadow-md flex items-center gap-2 w-24 justify-center ${
             page < pages
               ? "bg-blue-500 text-white hover:bg-blue-600"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
