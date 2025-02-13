@@ -1,4 +1,4 @@
-"use client"; // Asegura que el componente sea un Client Component
+"use client";
 
 import { useMemo } from "react";
 import PropTypes from "prop-types";
@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 export default function Pagination({ page, pages, onPageChange }) {
   if (typeof onPageChange !== "function") {
     console.error("Propiedad `onPageChange` no está definida o no es una función.");
-    return null; // Evita renderizar el componente si onPageChange no es válido
+    return null;
   }
 
   const handlePrevious = () => {
@@ -18,9 +18,9 @@ export default function Pagination({ page, pages, onPageChange }) {
   };
 
   const renderPageNumbers = useMemo(() => {
-    if (pages <= 0) return null; // Evita renderizar si no hay páginas
+    if (pages <= 0) return null;
 
-    const visiblePages = 5; // Máximo número de páginas visibles
+    const visiblePages = 5;
     const startPage = Math.max(1, page - Math.floor(visiblePages / 2));
     const endPage = Math.min(pages, startPage + visiblePages - 1);
 
@@ -30,7 +30,7 @@ export default function Pagination({ page, pages, onPageChange }) {
         <button
           key={pageNumber}
           onClick={() => onPageChange(pageNumber)}
-          className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
+          className={`px-3 py-2 text-xs sm:text-sm md:text-base rounded-lg font-medium transition-all duration-300 shadow-md ${
             page === pageNumber
               ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -45,42 +45,52 @@ export default function Pagination({ page, pages, onPageChange }) {
   }, [page, pages, onPageChange]);
 
   return (
-    <nav
-      className="flex flex-wrap justify-center items-center mt-8 gap-3"
-      aria-label="Paginación"
-    >
-      {/* Botón Anterior */}
-      <button
-        onClick={handlePrevious}
-        disabled={page <= 1}
-        className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
-          page > 1
-            ? "bg-blue-500 text-white hover:bg-blue-600"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
-        aria-disabled={page <= 1}
-        aria-label="Página anterior"
-      >
-        ⬅️ Anterior
-      </button>
+    <nav className="flex flex-col items-center mt-8 w-full" aria-label="Paginación">
+      {/* Logo personalizado similar a Google */}
+      <div className="text-lg sm:text-2xl font-bold text-gray-700 mb-4">
+        {"SALUDY"}
+        {Array.from({ length: pages > 5 ? 6 : pages }).map((_, index) => (
+          <span key={index} className={page === index + 1 ? "text-blue-500" : "text-gray-700"}>
+            o
+          </span>
+        ))}
+        {"SER"}
+      </div>
 
-      {/* Números de página */}
-      {renderPageNumbers}
+      <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
+        {/* Botón Anterior */}
+        <button
+          onClick={handlePrevious}
+          disabled={page <= 1}
+          className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded-lg font-medium transition-all duration-300 shadow-md ${
+            page > 1
+              ? "bg-blue-500 text-white hover:bg-blue-600"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+          aria-disabled={page <= 1}
+          aria-label="Página anterior"
+        >
+          ⬅️ Anterior
+        </button>
 
-      {/* Botón Siguiente */}
-      <button
-        onClick={handleNext}
-        disabled={page >= pages}
-        className={`px-3 py-2 text-sm sm:text-base rounded-lg font-medium shadow-md transition-all duration-300 ${
-          page < pages
-            ? "bg-blue-500 text-white hover:bg-blue-600"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
-        aria-disabled={page >= pages}
-        aria-label="Página siguiente"
-      >
-        Siguiente ➡️
-      </button>
+        {/* Números de página */}
+        {renderPageNumbers}
+
+        {/* Botón Siguiente */}
+        <button
+          onClick={handleNext}
+          disabled={page >= pages}
+          className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded-lg font-medium transition-all duration-300 shadow-md ${
+            page < pages
+              ? "bg-blue-500 text-white hover:bg-blue-600"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+          aria-disabled={page >= pages}
+          aria-label="Página siguiente"
+        >
+          Siguiente ➡️
+        </button>
+      </div>
     </nav>
   );
 }
