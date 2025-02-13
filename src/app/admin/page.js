@@ -107,7 +107,7 @@ export default function AdminForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+    <div className="max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8 ">
       <h1 className="text-3xl font-bold text-gray-800 text-center">Crear Nuevo Artículo</h1>
       <p className="text-gray-500 text-center mb-6">Completa los campos y publica un nuevo artículo.</p>
 

@@ -64,7 +64,7 @@ export default function UpdateArticle() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
+    <div className="max-w-3xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
       <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Actualizar Artículo</h1>
       <form className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
