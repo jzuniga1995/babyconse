@@ -154,14 +154,16 @@ export default async function ArticuloDetallesPage({ params }) {
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
        
 
-<ReactMarkdown
-  remarkPlugins={[remarkGfm]} // ✅ Habilitar tablas y más
+        <ReactMarkdown
+  remarkPlugins={[remarkGfm]} // ✅ Habilitar soporte para tablas y GitHub Flavored Markdown
   components={{
     h2: ({ ...props }) => (
       <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
     ),
     table: ({ ...props }) => (
-      <table className="w-full border-collapse border border-gray-300" {...props} />
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300" {...props} />
+      </div>
     ),
     th: ({ ...props }) => (
       <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
@@ -179,6 +181,7 @@ export default async function ArticuloDetallesPage({ params }) {
 >
   {articulo?.full_content || "Contenido no disponible."}
 </ReactMarkdown>
+
 
         </div>
 
