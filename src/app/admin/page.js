@@ -1,34 +1,25 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function AdminForm() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
 
-  // 🔒 Protección: Asegurar que el usuario es admin antes de mostrar la UI
   useEffect(() => {
-    if (status === "loading") return; // Evitar redirección prematura
-    if (!session || !session.user || session.user.role !== "admin") {
-      router.replace("/"); // Redirigir si no es admin
+    if (status === "loading") return;
+    if (!session || session.user.role !== "admin") {
+      router.push("/");
+    } else {
+      setIsAuthorized(true);
     }
-  }, [session, status, router]);
+  }, [status, session, router]);
 
-  // 🔄 Evitar que la UI se renderice si la sesión aún está cargando
-  if (status === "loading") {
-    return <p className="text-center mt-10">Cargando...</p>;
-  }
-
-  // ⛔ Evitar renderizar contenido si no es admin
-  if (!session || !session.user || session.user.role !== "admin") {
-    return null;
-  }
-
-  // 📌 Estado del formulario
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -89,6 +80,10 @@ export default function AdminForm() {
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthorized) {
+    return <p className="text-center mt-10">Cargando...</p>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
