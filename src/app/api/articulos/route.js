@@ -1,6 +1,6 @@
 import { getConnection } from "../../lib/db";
 import { generateSlug } from "../../utils/slugify";
-
+import { withAuth } from "@/app/lib/withAuth";
 // Función para manejar errores de respuesta
 const errorResponse = (message, status = 500) => {
   console.error(`❌ ERROR ${status}: ${message}`);
@@ -10,7 +10,7 @@ const errorResponse = (message, status = 500) => {
   );
 };
 
-// ✅ Obtener artículos con paginación (GET)
+// ✅ Obtener artículos con paginación (GET) → Acceso público
 export async function GET(request) {
   let connection;
   try {
@@ -52,8 +52,8 @@ export async function GET(request) {
   }
 }
 
-// ✅ Crear un nuevo artículo (POST)
-export async function POST(request) {
+// ✅ Crear un nuevo artículo (POST) → SOLO ADMIN
+export const POST = withAuth(async function (request) {
   let connection;
   try {
     const body = await request.json();
@@ -61,7 +61,6 @@ export async function POST(request) {
 
     const { title, description, link, image, category, full_content, meta_description, referencias } = body;
 
-    // 🔍 Validación estricta de datos
     if (![title, description, category, full_content].every(field => field?.trim())) {
       return errorResponse("El título, descripción, categoría y contenido son obligatorios.", 400);
     }
@@ -76,7 +75,6 @@ export async function POST(request) {
       return errorResponse("El slug generado ya existe. Intenta con otro título.", 409);
     }
 
-    // Insertar artículo
     const [result] = await connection.query(
       `INSERT INTO articulos (title, description, link, image, category, full_content, slug, meta_description) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -86,7 +84,6 @@ export async function POST(request) {
     const articuloId = result.insertId;
     console.log(`✅ Artículo creado con ID: ${articuloId}`);
 
-    // Insertar referencias (si existen)
     if (Array.isArray(referencias) && referencias.length > 0) {
       const referenciaQueries = referencias.map(ref => [articuloId, ref.title, ref.link]);
       const placeholders = referenciaQueries.map(() => "(?, ?, ?)").join(", ");
@@ -104,10 +101,10 @@ export async function POST(request) {
   } finally {
     if (connection) connection.release();
   }
-}
+}, ["admin"]); // Solo admin puede crear artículos
 
-// ✅ Actualizar un artículo existente (PUT)
-export async function PUT(request) {
+// ✅ Actualizar un artículo existente (PUT) → SOLO ADMIN
+export const PUT = withAuth(async function (request) {
   let connection;
   try {
     const url = new URL(request.url);
@@ -160,4 +157,4 @@ export async function PUT(request) {
   } finally {
     if (connection) connection.release();
   }
-}
+}, ["admin"]); // Solo admin puede actualizar artículos

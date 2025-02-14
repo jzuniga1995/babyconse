@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { slug } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
   const textAreaRef = useRef(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [article, setArticle] = useState({
     title: "",
@@ -20,6 +23,18 @@ export default function UpdateArticle() {
     meta_description: "",
   });
 
+  // Protege la ruta: solo permite acceso si es admin
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session || session.user.role !== "admin") {
+      router.push("/"); // Redirige si no es admin
+    } else {
+      setIsAuthorized(true);
+    }
+  }, [session, status, router]);
+
+  // Obtiene el artículo
   useEffect(() => {
     if (slug) {
       fetch(`/api/articulos/${slug}`)
@@ -87,6 +102,10 @@ export default function UpdateArticle() {
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthorized) {
+    return <p className="text-center mt-10">Cargando...</p>;
+  }
 
   return (
     <div className="max-w-3xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
