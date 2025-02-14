@@ -2,13 +2,26 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function UpdateArticle() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { slug } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
   const textAreaRef = useRef(null);
+
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session || session.user.role !== "admin/update-article") {
+      router.push("/");
+    } else {
+      setIsAuthorized(true);
+    }
+  }, [status, session, router]);
+  
 
   const [article, setArticle] = useState({
     title: "",
