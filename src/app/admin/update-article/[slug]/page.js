@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { slug } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,6 +22,25 @@ export default function UpdateArticle() {
     meta_description: "",
   });
 
+  // 🔒 Protege la página para solo administradores
+  useEffect(() => {
+    if (status === "loading") return;
+    if (!session || session.user.role !== "admin") {
+      router.replace("/"); // Redirigir a inicio si no es admin
+    }
+  }, [session, status, router]);
+
+  // ⏳ Mostrar "Cargando..." mientras se verifica la sesión
+  if (status === "loading") {
+    return <p className="text-center mt-10">Cargando...</p>;
+  }
+
+  // 🔄 Evita renderizar contenido antes de la redirección si no es admin
+  if (!session || session.user.role !== "admin") {
+    return null;
+  }
+
+  // 🔄 Cargar el artículo a editar
   useEffect(() => {
     if (slug) {
       fetch(`/api/articulos/${slug}`)

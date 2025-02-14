@@ -1,25 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AdminForm() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
 
   useEffect(() => {
-    if (status === "loading") return;
+    if (status === "loading") return; // No hacer nada mientras se carga la sesión
     if (!session || session.user.role !== "admin") {
-      router.push("/");
-    } else {
-      setIsAuthorized(true);
+      router.replace("/"); // Redirigir si no es admin y evitar que pueda volver con "atrás"
     }
-  }, [status, session, router]);
+  }, [session, status, router]);
 
+  // Mientras se verifica la sesión, mostrar "Cargando..."
+  if (status === "loading") {
+    return <p className="text-center mt-10">Cargando...</p>;
+  }
+
+  // Si el usuario no es admin, evitar que se renderice la UI antes de la redirección
+  if (!session || session.user.role !== "admin") {
+    return null;
+  }
+
+  // Estado del formulario
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -80,10 +88,6 @@ export default function AdminForm() {
       setIsSubmitting(false);
     }
   };
-
-  if (!isAuthorized) {
-    return <p className="text-center mt-10">Cargando...</p>;
-  }
 
   return (
     <div className="max-w-4xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
