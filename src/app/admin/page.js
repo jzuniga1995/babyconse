@@ -10,24 +10,25 @@ export default function AdminForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
 
+  // 🔒 Protección: Asegurar que el usuario es admin antes de mostrar la UI
   useEffect(() => {
-    if (status === "loading") return; // No hacer nada mientras se carga la sesión
-    if (!session || session.user.role !== "admin") {
-      router.replace("/"); // Redirigir si no es admin y evitar que pueda volver con "atrás"
+    if (status === "loading") return; // Evitar redirección prematura
+    if (!session || !session.user || session.user.role !== "admin") {
+      router.replace("/"); // Redirigir si no es admin
     }
   }, [session, status, router]);
 
-  // Mientras se verifica la sesión, mostrar "Cargando..."
+  // 🔄 Evitar que la UI se renderice si la sesión aún está cargando
   if (status === "loading") {
     return <p className="text-center mt-10">Cargando...</p>;
   }
 
-  // Si el usuario no es admin, evitar que se renderice la UI antes de la redirección
-  if (!session || session.user.role !== "admin") {
+  // ⛔ Evitar renderizar contenido si no es admin
+  if (!session || !session.user || session.user.role !== "admin") {
     return null;
   }
 
-  // Estado del formulario
+  // 📌 Estado del formulario
   const [form, setForm] = useState({
     title: "",
     slug: "",

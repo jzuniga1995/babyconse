@@ -7,7 +7,8 @@ import { useRouter, useParams } from "next/navigation";
 export default function UpdateArticle() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = params?.slug || ""; // Evitar undefined
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ message: "", type: "" });
   const textAreaRef = useRef(null);
@@ -22,10 +23,10 @@ export default function UpdateArticle() {
     meta_description: "",
   });
 
-  // 🔒 Protege la página para solo administradores
+  // 🔒 Protección: Solo admins pueden acceder
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || session.user.role !== "admin") {
+    if (!session || !session.user || session.user.role !== "admin") {
       router.replace("/"); // Redirigir a inicio si no es admin
     }
   }, [session, status, router]);
@@ -35,37 +36,44 @@ export default function UpdateArticle() {
     return <p className="text-center mt-10">Cargando...</p>;
   }
 
-  // 🔄 Evita renderizar contenido antes de la redirección si no es admin
-  if (!session || session.user.role !== "admin") {
+  // ⛔ Evitar renderizar contenido si no es admin
+  if (!session || !session.user || session.user.role !== "admin") {
     return null;
   }
 
-  // 🔄 Cargar el artículo a editar
+  // 🔄 Cargar el artículo a editar (Solo si `slug` es válido)
   useEffect(() => {
-    if (slug) {
-      fetch(`/api/articulos/${slug}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.articulo) {
-            setArticle({
-              title: data.articulo.title || "",
-              description: data.articulo.description || "",
-              link: data.articulo.link || "",
-              image: data.articulo.image || "",
-              category: data.articulo.category || "",
-              full_content: data.articulo.full_content || "",
-              meta_description: data.articulo.meta_description || "",
-            });
-          } else {
-            setAlert({ message: "No se encontró el artículo.", type: "error" });
-          }
-        })
-        .catch(() =>
-          setAlert({ message: "Error al obtener el artículo.", type: "error" })
-        );
-    }
+    if (!slug) return;
+
+    fetch(`/api/articulos/${slug}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("No se pudo obtener el artículo");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.articulo) {
+          setArticle({
+            title: data.articulo.title || "",
+            description: data.articulo.description || "",
+            link: data.articulo.link || "",
+            image: data.articulo.image || "",
+            category: data.articulo.category || "",
+            full_content: data.articulo.full_content || "",
+            meta_description: data.articulo.meta_description || "",
+          });
+        } else {
+          throw new Error("Artículo no encontrado");
+        }
+      })
+      .catch((error) => {
+        console.error("Error al obtener el artículo:", error);
+        setAlert({ message: "Error al obtener el artículo.", type: "error" });
+      });
   }, [slug]);
 
+  // Ajustar la altura del textarea dinámicamente
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "auto";
@@ -130,7 +138,7 @@ export default function UpdateArticle() {
           <input
             type="text"
             name="title"
-            value={article.title || ""}
+            value={article.title}
             onChange={handleChange}
             placeholder="Título"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -139,7 +147,7 @@ export default function UpdateArticle() {
           <input
             type="text"
             name="category"
-            value={article.category || ""}
+            value={article.category}
             onChange={handleChange}
             placeholder="Categoría"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -149,7 +157,7 @@ export default function UpdateArticle() {
 
         <textarea
           name="description"
-          value={article.description || ""}
+          value={article.description}
           onChange={handleChange}
           placeholder="Descripción breve"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -160,38 +168,20 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="image"
-          value={article.image || ""}
+          value={article.image}
           onChange={handleChange}
           placeholder="URL de la imagen"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-
-        <input
-          type="text"
-          name="link"
-          value={article.link || ""}
-          onChange={handleChange}
-          placeholder="Enlace externo (opcional)"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
 
         <textarea
           name="full_content"
           ref={textAreaRef}
-          value={article.full_content || ""}
+          value={article.full_content}
           onChange={handleChange}
           placeholder="Añadir nuevo contenido"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-hidden resize-none"
           required
-        />
-
-        <input
-          type="text"
-          name="meta_description"
-          value={article.meta_description || ""}
-          onChange={handleChange}
-          placeholder="Meta descripción para SEO"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
 
         <div className="flex space-x-4">
