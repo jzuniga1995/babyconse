@@ -28,31 +28,10 @@ export default function AdminForm() {
     category: "",
     full_content: "",
     meta_description: "",
-    referencias: [{ title: "", link: "" }],
   });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleReferenciaChange = (index, field, value) => {
-    const updatedReferencias = [...form.referencias];
-    updatedReferencias[index][field] = value;
-    setForm({ ...form, referencias: updatedReferencias });
-  };
-
-  const addReferencia = () => {
-    setForm({
-      ...form,
-      referencias: [...form.referencias, { title: "", link: "" }],
-    });
-  };
-
-  const removeReferencia = (index) => {
-    setForm({
-      ...form,
-      referencias: form.referencias.filter((_, i) => i !== index),
-    });
   };
 
   const showAlert = (message, type) => {
@@ -63,7 +42,6 @@ export default function AdminForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones de datos
     if (!form.title.trim() || !form.slug.trim() || !form.description.trim() || 
         !form.category.trim() || !form.full_content.trim()) {
       showAlert("⚠️ Todos los campos obligatorios deben ser completados.", "error");
@@ -72,32 +50,11 @@ export default function AdminForm() {
 
     setIsSubmitting(true);
 
-    // Log para depuración
-    console.log("📩 Enviando datos:", JSON.stringify({
-      title: form.title.trim(),
-      slug: form.slug.trim(),
-      description: form.description.trim(),
-      image: form.image.trim() || null,
-      category: form.category.trim(),
-      full_content: form.full_content.trim(),
-      meta_description: form.meta_description.trim() || null,
-      referencias: form.referencias.filter(ref => ref.title.trim() && ref.link.trim()),
-    }, null, 2));
-
     try {
       const response = await fetch("/api/articulos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: form.title.trim(),
-          slug: form.slug.trim(),
-          description: form.description.trim(),
-          image: form.image.trim() || null,
-          category: form.category.trim(),
-          full_content: form.full_content.trim(),
-          meta_description: form.meta_description.trim() || null,
-          referencias: form.referencias.filter(ref => ref.title.trim() && ref.link.trim()),
-        }),
+        body: JSON.stringify(form),
       });
 
       const data = await response.json();
@@ -112,7 +69,6 @@ export default function AdminForm() {
           category: "",
           full_content: "",
           meta_description: "",
-          referencias: [{ title: "", link: "" }],
         });
       } else {
         showAlert(`❌ Error: ${data.error || "Error desconocido"}`, "error");

@@ -79,7 +79,6 @@ export default async function ArticuloDetallesPage({ params }) {
 
   let articulo = null;
   let articulosRelacionados = [];
-  let referencias = [];
 
   try {
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
@@ -90,39 +89,30 @@ export default async function ArticuloDetallesPage({ params }) {
 
     articulo = data.articulo;
     articulosRelacionados = data.relacionados || [];
-
-    // Obtener referencias del artículo
-    const refResponse = await fetch(`${baseUrl}/api/articulo_referencias/${articulo.id}`, {
-      next: { revalidate: 60 },
-    });
-    if (refResponse.ok) {
-      const refData = await refResponse.json();
-      referencias = refData.references || [];
-    }
   } catch (error) {
     console.error("Error al obtener los datos:", error.message);
   }
 
   const structuredData = articulo
-  ? {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": articulo.title,
-      "description": articulo.meta_description || articulo.description,
-      "image": articulo.image || "/default-image.jpg",
-      "author": {
-        "@type": "Person",
-        "name": "Salud y Ser",
-        "url": "https://www.saludyser.com/nosotros" 
-      },
-      "datePublished": articulo.published_at,
-      "dateModified": articulo.updated_at,
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": `${baseUrl}/articulos/${slug}`
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": articulo.title,
+        "description": articulo.meta_description || articulo.description,
+        "image": articulo.image || "/default-image.jpg",
+        "author": {
+          "@type": "Person",
+          "name": "Salud y Ser",
+          "url": "https://www.saludyser.com/nosotros",
+        },
+        "datePublished": articulo.published_at,
+        "dateModified": articulo.updated_at,
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": `${baseUrl}/articulos/${slug}`,
+        },
       }
-    }
-  : null;
+    : null;
 
   return (
     <section className="bg-gray-50 min-h-screen py-10 mt-16">
@@ -152,109 +142,73 @@ export default async function ArticuloDetallesPage({ params }) {
       <div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-gray-800">{articulo?.title || "Título no disponible"}</h1>
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
-       
-
-        <ReactMarkdown
-  remarkPlugins={[remarkGfm]} // ✅ Habilitar soporte para tablas y GitHub Flavored Markdown
-  components={{
-    h2: ({ ...props }) => (
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-    ),
-    table: ({ ...props }) => (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300" {...props} />
-      </div>
-    ),
-    th: ({ ...props }) => (
-      <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
-    ),
-    td: ({ ...props }) => (
-      <td className="border border-gray-300 px-4 py-2" {...props} />
-    ),
-    blockquote: ({ ...props }) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
-    ),
-    ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
-    ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-    li: ({ ...props }) => <li className="mb-2" {...props} />,
-  }}
->
-  {articulo?.full_content || "Contenido no disponible."}
-</ReactMarkdown>
-
-
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h2: ({ ...props }) => (
+                <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+              ),
+              table: ({ ...props }) => (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300" {...props} />
+                </div>
+              ),
+              th: ({ ...props }) => (
+                <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
+              ),
+              td: ({ ...props }) => (
+                <td className="border border-gray-300 px-4 py-2" {...props} />
+              ),
+              blockquote: ({ ...props }) => (
+                <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
+              ),
+              ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+              ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+              li: ({ ...props }) => <li className="mb-2" {...props} />,
+            }}
+          >
+            {articulo?.full_content || "Contenido no disponible."}
+          </ReactMarkdown>
         </div>
-
-        {referencias.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-xl font-bold text-gray-800 border-b border-gray-300 pb-2">
-              Fuentes y Referencias
-            </h2>
-            <ul className="list-disc pl-6 mt-4 space-y-2">
-              {referencias.map((ref, index) => (
-                <li key={index}>
-                  <a
-                    href={ref.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-700 underline"
-                  >
-                    {ref.title || "Referencia sin título"}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
+
       {articulosRelacionados.length > 0 ? (
-  <div className="max-w-6xl mx-auto px-4 mt-10">
-    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-      Más artículos sobre {articulo?.category || "este tema"}
-    </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {articulosRelacionados.map((rel) => (
-        <Link
-          key={rel.id}
-          href={`/articulos/${rel.slug}`}
-          className="block group"
-        >
-          <div className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition">
-            <Image
-              src={rel.image || "/default-image.jpg"}
-              alt={`Imagen del artículo: ${rel.title}`}
-              width={400}
-              height={200}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-800 group-hover:text-green-500 transition-colors">
-                {rel.title || "Título no disponible"}
-              </h3>
-              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                {rel.meta_description ||
-                  rel.description ||
-                  "No hay descripción disponible."}
-              </p>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 mt-10">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            Más artículos sobre {articulo?.category || "este tema"}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {articulosRelacionados.map((rel) => (
+              <Link key={rel.id} href={`/articulos/${rel.slug}`} className="block group">
+                <div className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition">
+                  <Image
+                    src={rel.image || "/default-image.jpg"}
+                    alt={`Imagen del artículo: ${rel.title}`}
+                    width={400}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-green-500 transition-colors">
+                      {rel.title || "Título no disponible"}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                      {rel.meta_description || rel.description || "No hay descripción disponible."}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
-        </Link>
-      ))}
-    </div>
-  </div>
-) : (
-  <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
-    <p className="text-gray-600">No se encontraron artículos relacionados.</p>
-  </div>
-)}
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-4 mt-10 text-center">
+          <p className="text-gray-600">No se encontraron artículos relacionados.</p>
+        </div>
+      )}
 
-
-      {/* Incluir datos estructurados */}
       {structuredData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       )}
     </section>
   );

@@ -1,20 +1,21 @@
 import { getConnection } from "../../../lib/db";
 
-export async function GET(request, { params }) {
+// ✅ OBTENER ARTÍCULO POR SLUG (GET)
+export async function GET(request, context) {
   let connection;
 
   try {
-    const { slug } = params; // Obtener el slug desde la URL
+    // ✅ Esperar que `params` esté disponible
+    const params = await context.params;
 
-    if (!slug) {
+    if (!params || !params.slug) {
       return new Response(
         JSON.stringify({ error: "Slug no proporcionado." }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
+
+    const { slug } = params;
 
     connection = await getConnection();
 
@@ -24,11 +25,10 @@ export async function GET(request, { params }) {
       [slug]
     );
 
-    // Obtener el artículo principal
+    // Obtener el artículo por slug
     const [rows] = await connection.query(
-      `SELECT 
-         id, title, description, link, image, category, full_content, 
-         published_at, views, meta_description
+      `SELECT id, title, description, link, image, category, full_content, 
+              published_at, views, meta_description
        FROM articulos 
        WHERE slug = ?`,
       [slug]
@@ -37,10 +37,7 @@ export async function GET(request, { params }) {
     if (rows.length === 0) {
       return new Response(
         JSON.stringify({ error: "Artículo no encontrado." }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
+        { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -64,49 +61,47 @@ export async function GET(request, { params }) {
       [articulo.category, slug]
     );
 
-    // Respuesta con datos y encabezados de caché
     return new Response(
       JSON.stringify({
         articulo,
-        referencias: referencias || [], // Asegurar que sea un arreglo
-        relacionados: relacionados || [], // Asegurar que sea un arreglo
+        referencias: referencias || [],
+        relacionados: relacionados || [],
       }),
       {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599", // Cache por 1 hora
+          "Cache-Control": "s-maxage=3600, stale-while-revalidate=3599",
         },
       }
     );
   } catch (error) {
     console.error("Error al obtener el artículo:", error);
-
     return new Response(
       JSON.stringify({ error: "Error interno del servidor." }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   } finally {
     if (connection) connection.release();
   }
 }
 
-// ✅ NUEVA FUNCIÓN PARA ACTUALIZAR EL ARTÍCULO (PUT)
-export async function PUT(request, { params }) {
+// ✅ ACTUALIZAR ARTÍCULO POR SLUG (PUT)
+export async function PUT(request, context) {
   let connection;
-  try {
-    const { slug } = params; // Obtener el slug desde la URL
 
-    if (!slug) {
+  try {
+    // ✅ Esperar que `params` esté disponible
+    const params = await context.params;
+
+    if (!params || !params.slug) {
       return new Response(
         JSON.stringify({ error: "Slug no proporcionado." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
+    const { slug } = params;
     const body = await request.json();
     const { title, description, link, image, category, full_content, meta_description } = body;
 

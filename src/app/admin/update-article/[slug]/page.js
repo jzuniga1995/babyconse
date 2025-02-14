@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateArticle() {
   const router = useRouter();
-  const { slug } = useParams(); 
+  const { slug } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState({ message: "", type: "" });
+  const textAreaRef = useRef(null);
 
   const [article, setArticle] = useState({
     title: "",
@@ -24,17 +26,39 @@ export default function UpdateArticle() {
         .then((res) => res.json())
         .then((data) => {
           if (data.articulo) {
-            setArticle(data.articulo);
+            setArticle({
+              title: data.articulo.title || "",
+              description: data.articulo.description || "",
+              link: data.articulo.link || "",
+              image: data.articulo.image || "",
+              category: data.articulo.category || "",
+              full_content: data.articulo.full_content || "",
+              meta_description: data.articulo.meta_description || "",
+            });
           } else {
-            console.error("No se encontró el artículo.");
+            setAlert({ message: "No se encontró el artículo.", type: "error" });
           }
         })
-        .catch((err) => console.error("Error al obtener el artículo:", err));
+        .catch(() =>
+          setAlert({ message: "Error al obtener el artículo.", type: "error" })
+        );
     }
   }, [slug]);
 
+  useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "auto";
+      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+    }
+  }, [article.full_content]);
+
   const handleChange = (e) => {
-    setArticle({ ...article, [e.target.name]: e.target.value });
+    setArticle({ ...article, [e.target.name]: e.target.value || "" });
+  };
+
+  const showAlert = (message, type) => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert({ message: "", type: "" }), 3000);
   };
 
   const handleSubmit = async (e, append = false) => {
@@ -49,15 +73,16 @@ export default function UpdateArticle() {
       });
 
       if (response.ok) {
-        alert("Artículo actualizado correctamente.");
-        router.push("/admin");
+        showAlert("✅ Artículo actualizado correctamente.", "success");
+        setTimeout(() => {
+          router.push("/admin");
+        }, 2000);
       } else {
-        console.error("Error al actualizar el artículo.");
-        alert("Error al actualizar el artículo.");
+        showAlert("❌ Error al actualizar el artículo.", "error");
       }
     } catch (error) {
       console.error("Error al actualizar:", error);
-      alert("Hubo un error al actualizar el artículo.");
+      showAlert("❌ Hubo un error al actualizar el artículo.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -65,13 +90,26 @@ export default function UpdateArticle() {
 
   return (
     <div className="max-w-3xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-8">
-      <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Actualizar Artículo</h1>
+      <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
+        Actualizar Artículo
+      </h1>
+
+      {alert.message && (
+        <div
+          className={`p-3 mb-6 text-white rounded-lg text-center ${
+            alert.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
+
       <form className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <input
             type="text"
             name="title"
-            value={article.title}
+            value={article.title || ""}
             onChange={handleChange}
             placeholder="Título"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -80,7 +118,7 @@ export default function UpdateArticle() {
           <input
             type="text"
             name="category"
-            value={article.category}
+            value={article.category || ""}
             onChange={handleChange}
             placeholder="Categoría"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -90,7 +128,7 @@ export default function UpdateArticle() {
 
         <textarea
           name="description"
-          value={article.description}
+          value={article.description || ""}
           onChange={handleChange}
           placeholder="Descripción breve"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -101,7 +139,7 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="image"
-          value={article.image}
+          value={article.image || ""}
           onChange={handleChange}
           placeholder="URL de la imagen"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -110,7 +148,7 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="link"
-          value={article.link}
+          value={article.link || ""}
           onChange={handleChange}
           placeholder="Enlace externo (opcional)"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -118,18 +156,18 @@ export default function UpdateArticle() {
 
         <textarea
           name="full_content"
-          value={article.full_content}
+          ref={textAreaRef}
+          value={article.full_content || ""}
           onChange={handleChange}
           placeholder="Añadir nuevo contenido"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          rows="6"
+          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-hidden resize-none"
           required
         />
 
         <input
           type="text"
           name="meta_description"
-          value={article.meta_description}
+          value={article.meta_description || ""}
           onChange={handleChange}
           placeholder="Meta descripción para SEO"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
