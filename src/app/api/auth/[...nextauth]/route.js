@@ -13,25 +13,27 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user && user.email) {
         token.role = user.email === process.env.ADMIN_EMAIL ? "admin" : "user";
-      } else {
-        token.role = "user";
       }
-      return { ...token }; // ✅ Asegurar que siempre es JSON serializable
+      return token; // ✅ JSON válido
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub || null;
         session.user.role = token.role || "user";
       }
-      return { ...session }; // ✅ Asegurar que siempre es JSON serializable
+      return session; // ✅ JSON válido
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: "/login", // ✅ Redirigir a página de login personalizada
+    error: "/auth/error", // (Opcional) Página de errores de autenticación
   },
   debug: process.env.NODE_ENV === "development",
+  session: {
+    strategy: "jwt", // ✅ Usa JWT en lugar de sesiones en base de datos
+  },
 };
 
-// ✅ Corrección en la exportación para Next.js App Router
+// ✅ Exportación correcta para Next.js App Router
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

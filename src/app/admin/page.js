@@ -13,8 +13,9 @@ export default function AdminForm() {
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || session.user.role !== "admin") {
-      router.push("/");
+
+    if (!session || session.user?.role !== "admin") {
+      router.replace("/"); // Redirige al usuario si no es admin
     } else {
       setIsAuthorized(true);
     }
@@ -42,7 +43,8 @@ export default function AdminForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.title.trim() || !form.slug.trim() || !form.description.trim() || 
+    // Validación de campos obligatorios
+    if (!form.title.trim() || !form.description.trim() || 
         !form.category.trim() || !form.full_content.trim()) {
       showAlert("⚠️ Todos los campos obligatorios deben ser completados.", "error");
       return;
@@ -103,7 +105,7 @@ export default function AdminForm() {
             name="title"
             value={form.title}
             onChange={handleChange}
-            placeholder="Título"
+            placeholder="Título *"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
@@ -114,7 +116,6 @@ export default function AdminForm() {
             onChange={handleChange}
             placeholder="Slug (URL amigable)"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
           />
         </div>
 
@@ -122,7 +123,7 @@ export default function AdminForm() {
           name="description"
           value={form.description}
           onChange={handleChange}
-          placeholder="Descripción breve"
+          placeholder="Descripción breve *"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           rows="3"
           required
@@ -142,7 +143,7 @@ export default function AdminForm() {
           name="category"
           value={form.category}
           onChange={handleChange}
-          placeholder="Categoría"
+          placeholder="Categoría *"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           required
         />
@@ -151,7 +152,7 @@ export default function AdminForm() {
           name="full_content"
           value={form.full_content}
           onChange={handleChange}
-          placeholder="Contenido completo del artículo"
+          placeholder="Contenido completo del artículo *"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           rows="6"
           required
@@ -168,7 +169,7 @@ export default function AdminForm() {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600 disabled:bg-gray-400"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Enviando..." : "Publicar Artículo"}

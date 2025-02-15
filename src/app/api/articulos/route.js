@@ -82,12 +82,17 @@ export const POST = withAuth(async function (request) {
     const articuloId = result.insertId;
     console.log(`✅ Artículo creado con ID: ${articuloId}`);
 
+    // Insertar referencias (si existen)
     if (Array.isArray(referencias) && referencias.length > 0) {
-      const referenciaQueries = referencias.map(ref => [articuloId, ref.title, ref.link]);
-      const placeholders = referenciaQueries.map(() => "(?, ?, ?)").join(", ");
-      const flatValues = referenciaQueries.flat();
+      try {
+        const referenciaQueries = referencias.map(ref => [articuloId, ref.title, ref.link]);
+        const placeholders = referenciaQueries.map(() => "(?, ?, ?)").join(", ");
+        const flatValues = referenciaQueries.flat();
 
-      await connection.query(`INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ${placeholders}`, flatValues);
+        await connection.query(`INSERT INTO articulo_referencias (articulo_id, title, link) VALUES ${placeholders}`, flatValues);
+      } catch (refError) {
+        console.error("⚠️ Error insertando referencias:", refError);
+      }
     }
 
     return new Response(
@@ -107,7 +112,7 @@ export const PUT = withAuth(async function (request) {
   let connection;
   try {
     const url = new URL(request.url);
-    const slug = url.pathname.split("/").pop(); // ✅ Obtiene el slug correctamente
+    const slug = url.pathname.split("/").pop();
     const append = url.searchParams.get("append") === "true";
 
     if (!slug) {

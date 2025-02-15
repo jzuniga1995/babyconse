@@ -1,4 +1,5 @@
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 /**
  * Middleware para proteger rutas de API y verificar roles.
@@ -6,25 +7,32 @@ import { getSession } from "next-auth/react";
  * @param {Array} allowedRoles - Lista de roles permitidos (opcional).
  */
 export function withAuth(handler, allowedRoles = []) {
-  return async (req, res) => {
+  return async (req) => {
     // Permitir acceso sin autenticación a rutas específicas
-    if (req.url === "/sitemap.xml") {
-      return handler(req, res);
+    if (req.nextUrl?.pathname === "/sitemap.xml") {
+      return handler(req);
     }
 
-    const session = await getSession({ req });
+    // Obtener sesión desde el backend (App Router)
+    const session = await getServerSession(authOptions);
 
     // Si el usuario no está autenticado, devolver un error
-    if (!session) {
-      return res.status(401).json({ error: "No autorizado" });
+    if (!session || !session.user) {
+      return new Response(
+        JSON.stringify({ error: "No autorizado" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Si se especifican roles permitidos, verificar si el usuario tiene uno de ellos
     if (allowedRoles.length > 0 && !allowedRoles.includes(session.user.role)) {
-      return res.status(403).json({ error: "Acceso prohibido" });
+      return new Response(
+        JSON.stringify({ error: "Acceso prohibido" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    req.user = session.user; // Adjuntar datos del usuario a la request
-    return handler(req, res);
+    // Pasar el request al handler con la sesión del usuario
+    return handler(req);
   };
 }

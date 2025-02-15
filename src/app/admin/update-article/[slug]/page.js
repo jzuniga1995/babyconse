@@ -27,8 +27,8 @@ export default function UpdateArticle() {
   useEffect(() => {
     if (status === "loading") return;
 
-    if (!session || session.user.role !== "admin") {
-      router.push("/"); // Redirige si no es admin
+    if (!session || session.user?.role !== "admin") {
+      router.replace("/"); // Redirige si no es admin
     } else {
       setIsAuthorized(true);
     }
@@ -51,12 +51,10 @@ export default function UpdateArticle() {
               meta_description: data.articulo.meta_description || "",
             });
           } else {
-            setAlert({ message: "No se encontró el artículo.", type: "error" });
+            showAlert("No se encontró el artículo.", "error");
           }
         })
-        .catch(() =>
-          setAlert({ message: "Error al obtener el artículo.", type: "error" })
-        );
+        .catch(() => showAlert("Error al obtener el artículo.", "error"));
     }
   }, [slug]);
 
@@ -87,13 +85,15 @@ export default function UpdateArticle() {
         body: JSON.stringify(article),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         showAlert("✅ Artículo actualizado correctamente.", "success");
         setTimeout(() => {
           router.push("/admin");
         }, 2000);
       } else {
-        showAlert("❌ Error al actualizar el artículo.", "error");
+        showAlert(`❌ Error: ${data.error || "Error desconocido"}`, "error");
       }
     } catch (error) {
       console.error("Error al actualizar:", error);
@@ -128,18 +128,18 @@ export default function UpdateArticle() {
           <input
             type="text"
             name="title"
-            value={article.title || ""}
+            value={article.title}
             onChange={handleChange}
-            placeholder="Título"
+            placeholder="Título *"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
           <input
             type="text"
             name="category"
-            value={article.category || ""}
+            value={article.category}
             onChange={handleChange}
-            placeholder="Categoría"
+            placeholder="Categoría *"
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
@@ -147,9 +147,9 @@ export default function UpdateArticle() {
 
         <textarea
           name="description"
-          value={article.description || ""}
+          value={article.description}
           onChange={handleChange}
-          placeholder="Descripción breve"
+          placeholder="Descripción breve *"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           rows="3"
           required
@@ -158,7 +158,7 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="image"
-          value={article.image || ""}
+          value={article.image}
           onChange={handleChange}
           placeholder="URL de la imagen"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -167,7 +167,7 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="link"
-          value={article.link || ""}
+          value={article.link}
           onChange={handleChange}
           placeholder="Enlace externo (opcional)"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -176,9 +176,9 @@ export default function UpdateArticle() {
         <textarea
           name="full_content"
           ref={textAreaRef}
-          value={article.full_content || ""}
+          value={article.full_content}
           onChange={handleChange}
-          placeholder="Añadir nuevo contenido"
+          placeholder="Añadir nuevo contenido *"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none overflow-hidden resize-none"
           required
         />
@@ -186,7 +186,7 @@ export default function UpdateArticle() {
         <input
           type="text"
           name="meta_description"
-          value={article.meta_description || ""}
+          value={article.meta_description}
           onChange={handleChange}
           placeholder="Meta descripción para SEO"
           className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -196,7 +196,7 @@ export default function UpdateArticle() {
           <button
             type="button"
             onClick={(e) => handleSubmit(e, false)}
-            className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-red-600"
+            className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-red-600 disabled:bg-gray-400"
             disabled={isSubmitting}
           >
             Reemplazar Contenido
@@ -205,7 +205,7 @@ export default function UpdateArticle() {
           <button
             type="button"
             onClick={(e) => handleSubmit(e, true)}
-            className="flex-1 bg-green-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-green-600"
+            className="flex-1 bg-green-500 text-white px-4 py-3 rounded-lg text-lg font-semibold hover:bg-green-600 disabled:bg-gray-400"
             disabled={isSubmitting}
           >
             Agregar Contenido
