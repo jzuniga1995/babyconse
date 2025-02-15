@@ -10,25 +10,28 @@ export const authOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    // Agregar el rol al token JWT
     async jwt({ token, user }) {
-      if (user) {
-        // Define un rol basado en el correo electrónico del administrador
+      if (user && user.email) {
         token.role = user.email === process.env.ADMIN_EMAIL ? "admin" : "user";
+      } else {
+        token.role = "user";
       }
-      return token;
+      return { ...token }; // ✅ Asegurar que siempre es JSON serializable
     },
-    // Añadir información del rol a la sesión
     async session({ session, token }) {
-      session.user.id = token.sub; // Añade el ID del usuario al objeto de sesión
-      session.user.role = token.role; // Añade el rol del usuario a la sesión
-      return session;
+      if (session.user) {
+        session.user.id = token.sub || null;
+        session.user.role = token.role || "user";
+      }
+      return { ...session }; // ✅ Asegurar que siempre es JSON serializable
     },
   },
+  pages: {
+    signIn: "/login",
+  },
+  debug: process.env.NODE_ENV === "development",
 };
 
-// Exportar los manejadores de los métodos HTTP
+// ✅ Corrección en la exportación para Next.js App Router
 const handler = NextAuth(authOptions);
-
-export const GET = handler;
-export const POST = handler;
+export { handler as GET, handler as POST };

@@ -1,6 +1,7 @@
 import { getConnection } from "../../lib/db";
 import { generateSlug } from "../../utils/slugify";
 import { withAuth } from "@/app/lib/withAuth";
+
 // Función para manejar errores de respuesta
 const errorResponse = (message, status = 500) => {
   console.error(`❌ ERROR ${status}: ${message}`);
@@ -40,10 +41,7 @@ export async function GET(request) {
 
     return new Response(
       JSON.stringify({ data: rows, total: totalRows[0]?.total || 0 }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
     return errorResponse("Error interno al obtener artículos.");
@@ -97,6 +95,7 @@ export const POST = withAuth(async function (request) {
       { status: 201, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
+    console.error("❌ Error en POST /api/articulos:", error);
     return errorResponse("Error al crear el artículo.");
   } finally {
     if (connection) connection.release();
@@ -108,7 +107,7 @@ export const PUT = withAuth(async function (request) {
   let connection;
   try {
     const url = new URL(request.url);
-    const slug = url.pathname.split("/").pop();
+    const slug = url.pathname.split("/").pop(); // ✅ Obtiene el slug correctamente
     const append = url.searchParams.get("append") === "true";
 
     if (!slug) {
@@ -153,6 +152,7 @@ export const PUT = withAuth(async function (request) {
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
+    console.error("❌ Error en PUT /api/articulos:", error);
     return errorResponse("Error al actualizar el artículo.");
   } finally {
     if (connection) connection.release();
