@@ -2,7 +2,7 @@ import Link from "next/link";
 import Button from "./Button";
 
 export default function Hero() {
-  const heroTitle = "Bienvenidos a SaludySer";
+  const heroTitle = "Bienvenidos a ";
   const heroSubtitle =
     "Descubre artículos, consejos y herramientas para mejorar tu bienestar físico, mental y emocional.";
 
