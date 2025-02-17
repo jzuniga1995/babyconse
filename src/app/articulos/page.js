@@ -1,30 +1,31 @@
 import MenuCategorias from "../components/MenuCategorias";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// 📌 Generar metadatos dinámicos para la página de categorías de artículos
 export async function generateMetadata() {
   let metadata = {
-    title: "Categorías de Salud y Bienestar | Artículos - Salud y Ser",
+    title: "Explora Categorías de Salud y Bienestar | Salud y Ser",
     description:
-      "Descubre todas las categorías y artículos sobre salud, bienestar físico y mental, nutrición, ejercicio, prevención médica y más temas esenciales para tu calidad de vida.",
+      "Descubre información sobre salud, bienestar físico y mental, nutrición, ejercicio y prevención médica. Encuentra artículos especializados para mejorar tu calidad de vida.",
     keywords:
-      "categorías de salud, bienestar, nutrición, ejercicio, salud mental, prevención médica, vida saludable, artículos sobre salud",
+      "salud, bienestar, nutrición, ejercicio, salud mental, prevención médica, vida saludable, artículos de salud",
     openGraph: {
-      title: "Categorías de Salud y Bienestar | Artículos - Salud y Ser",
+      title: "Explora Categorías de Salud y Bienestar | Salud y Ser",
       description:
-        "Explora una variedad de categorías y artículos sobre salud y bienestar.",
+        "Encuentra artículos especializados sobre salud, bienestar, nutrición y ejercicio en nuestras diferentes categorías.",
       type: "website",
       url: `${baseUrl}/articulos`,
       images: [
         {
           url: `${baseUrl}/images/og-articulos.jpg`,
-          alt: "Categorías de Salud y Bienestar - Salud y Ser",
+          alt: "Explora categorías de Salud y Bienestar - Salud y Ser",
           width: 1200,
           height: 630,
         },
       ],
     },
     alternates: {
-      canonical: `${baseUrl}/articulos`, // URL canónica predeterminada
+      canonical: `${baseUrl}/articulos`,
     },
   };
 
@@ -50,13 +51,9 @@ export async function generateMetadata() {
           .join(", ")} y más temas esenciales para tu salud y bienestar.`,
         openGraph: {
           ...metadata.openGraph,
-          description: `Explora una variedad de categorías como ${categorias
+          description: `Accede a contenido exclusivo sobre ${categorias
             .slice(0, 3)
-            .join(", ")} y más temas esenciales para tu salud.`,
-        },
-        // ✅ Actualizar la URL canónica según las categorías
-        alternates: {
-          canonical: `${baseUrl}/articulos`,
+            .join(", ")} y otros temas de salud.`,
         },
       };
     }
@@ -67,8 +64,7 @@ export async function generateMetadata() {
   return metadata;
 }
 
-
-// 📌 Página principal
+// 📌 Página principal de artículos
 export default async function ArticulosPage() {
   let articulos = [];
   let categorias = [];
@@ -90,12 +86,13 @@ export default async function ArticulosPage() {
     console.error("Error al obtener los artículos:", error.message);
   }
 
+  // 📌 JSON-LD para SEO (Datos estructurados)
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
+    "@type": "CollectionPage",
     name: "Categorías de Artículos sobre Salud y Bienestar",
     description:
-      "Descubre todas las categorías y artículos sobre salud, bienestar físico y mental, nutrición, ejercicio, prevención médica y más temas esenciales para tu calidad de vida.",
+      "Descubre categorías y artículos sobre salud, bienestar físico y mental, nutrición, ejercicio y prevención médica.",
     publisher: {
       "@type": "Organization",
       name: "Salud y Ser",
@@ -105,7 +102,7 @@ export default async function ArticulosPage() {
       },
     },
     mainEntity: categorias.map((categoria) => ({
-      "@type": "Category",
+      "@type": "Thing",
       name: categoria,
     })),
   };
@@ -119,12 +116,11 @@ export default async function ArticulosPage() {
       />
 
       <h1 className="text-5xl font-extrabold text-center text-gray-800 py-8">
-        Categorías de Artículos sobre Salud, Nutrición y Bienestar
+        Categorías de Artículos sobre Salud y Bienestar
       </h1>
       <p className="text-center text-gray-600 mb-8 text-lg px-4">
-        Explora una variedad de categorías relacionadas con el bienestar físico,
-        mental y emocional. Aprende sobre nutrición, ejercicio, salud mental,
-        prevención médica y más temas esenciales para tu calidad de vida.
+        Explora artículos sobre nutrición, ejercicio, salud mental y prevención médica para mejorar
+        tu bienestar físico y emocional.
       </p>
 
       {articulos.length > 0 ? (

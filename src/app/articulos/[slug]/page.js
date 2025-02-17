@@ -20,12 +20,15 @@ export async function generateStaticParams() {
     return [];
   }
 }
-
 export async function generateMetadata({ params }) {
-  const resolvedParams = await params; // Resolver params como promesa
-  const { slug } = resolvedParams; // Acceder al slug después de resolver la promesa
-
   try {
+    const resolvedParams = await params; // Se mantiene la estructura original
+    const { slug } = resolvedParams || {}; // Validación de parámetros
+
+    if (!slug) {
+      throw new Error("El parámetro 'slug' es obligatorio.");
+    }
+
     const response = await fetch(`${baseUrl}/api/articulos/${slug}`, {
       next: { revalidate: 60 },
     });
@@ -35,16 +38,14 @@ export async function generateMetadata({ params }) {
       const articulo = data.articulo;
 
       return {
-        title: `${articulo.title} | Salud y Ser`,
-        description:
-          articulo.meta_description || articulo.description || "Lee más sobre este interesante tema.",
+        title: `${articulo.title} | Salud y Ser`, 
+        description: articulo.meta_description || articulo.description || "Lee más sobre este tema en Salud y Ser.",
         keywords: articulo.meta_keywords || "salud, bienestar, nutrición",
         openGraph: {
-          title: articulo.title,
-          description:
-            articulo.meta_description || articulo.description || "Descubre más información útil.",
+          title: `${articulo.title} | Información y Consejos en Salud y Ser`,
+          description: articulo.meta_description || articulo.description || "Descubre información útil.",
           type: "article",
-          image: articulo.image || "/default-image.jpg",
+          image: articulo.image || "/images/default.jpg",
           url: `${baseUrl}/articulos/${slug}`,
           article: {
             publishedTime: articulo.published_at,
@@ -53,7 +54,6 @@ export async function generateMetadata({ params }) {
             tags: articulo.meta_keywords ? articulo.meta_keywords.split(",") : [],
           },
         },
-        // ✅ Agregar la canónica dinámica
         alternates: {
           canonical: `${baseUrl}/articulos/${slug}`,
         },
@@ -64,13 +64,14 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: "Artículo no encontrado - Salud y Ser",
+    title: "Artículo no encontrado | Salud y Ser",
     description: "El artículo que buscas no está disponible.",
     alternates: {
-      canonical: `${baseUrl}/articulos/${slug}`, // Canónica genérica en caso de error
+      canonical: `${baseUrl}/articulos/${slug}`,
     },
   };
 }
+
 
 // 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {

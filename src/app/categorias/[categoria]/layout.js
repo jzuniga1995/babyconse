@@ -22,8 +22,8 @@ export async function generateStaticParams() {
 // 📌 Generar metadatos dinámicos
 export async function generateMetadata({ params }) {
   try {
-    const resolvedParams = await params; // Asegúrate de resolver params si es necesario
-    const { categoria: categoriaSlug } = resolvedParams || {}; // Validar que exista params
+    const resolvedParams = await params; // Se mantiene la estructura original
+    const { categoria: categoriaSlug } = resolvedParams || {}; // Validación de parámetros
 
     if (!categoriaSlug) {
       throw new Error("El parámetro 'categoriaSlug' es obligatorio.");
@@ -32,16 +32,16 @@ export async function generateMetadata({ params }) {
     const categoriaNombre = decodeURIComponent(categoriaSlug.replace(/-/g, " ")).toLowerCase();
 
     let metadata = {
-      title: `Artículos sobre ${categoriaNombre} | Saludyser`,
-      description: `Explora los mejores artículos sobre ${categoriaNombre} en Saludyser.`,
+      title: `Guía sobre ${categoriaNombre} | Saludyser`,  
+      description: `Encuentra artículos destacados y consejos sobre ${categoriaNombre} en Saludyser.`,
       openGraph: {
-        title: `Artículos sobre ${categoriaNombre} | Saludyser`,
-        description: `Descubre artículos destacados sobre ${categoriaNombre}.`,
+        title: `Guía sobre ${categoriaNombre} | Saludyser`,
+        description: `Explora información de calidad sobre ${categoriaNombre} en Saludyser.`,
         url: `${baseUrl}/categorias/${categoriaSlug}`,
         images: [
           {
             url: `${baseUrl}/images/categorias/default-category.jpg`,
-            alt: `Artículos sobre ${categoriaNombre} - Saludyser`,
+            alt: `Guía sobre ${categoriaNombre} - Saludyser`,
             width: 1200,
             height: 630,
           },
@@ -52,6 +52,7 @@ export async function generateMetadata({ params }) {
       },
     };
 
+    // 🔹 Obtener datos de la categoría
     const response = await fetch(`${baseUrl}/api/categorias/${categoriaSlug}`, {
       next: { revalidate: 60 },
     });
@@ -62,16 +63,20 @@ export async function generateMetadata({ params }) {
       if (data && data.name) {
         metadata = {
           ...metadata,
-          title: `Artículos sobre ${data.name} | Saludyser`,
-          description: data.meta_description || metadata.description,
+          title: `Descubre todo sobre ${data.name} | Saludyser`,
+          description: data.meta_description 
+            ? `Aprende sobre ${data.name}: información útil, consejos y más en Saludyser.` 
+            : metadata.description,  
           openGraph: {
             ...metadata.openGraph,
-            title: `Artículos sobre ${data.name} | Saludyser`,
-            description: data.meta_description || metadata.openGraph.description,
+            title: `Explora ${data.name} | Saludyser`,
+            description: data.meta_description 
+              ? `Guía detallada sobre ${data.name} en Saludyser.` 
+              : metadata.openGraph.description,
             images: [
               {
                 url: data.image_url || `${baseUrl}/images/categorias/${categoriaSlug}.jpg`,
-                alt: data.image_alt || `Artículos sobre ${data.name} - Saludyser`,
+                alt: `Información sobre ${data.name} - Saludyser`,
                 width: 1200,
                 height: 630,
               },
