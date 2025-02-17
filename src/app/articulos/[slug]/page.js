@@ -5,6 +5,12 @@ import Image from "next/image";
 import remarkGfm from "remark-gfm";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// 📌 Función para contar cuántos H2 hay antes de renderizar
+function countH2(content) {
+  const h2Matches = content.match(/^##\s+/gm);
+  return h2Matches ? h2Matches.length : 0;
+}
+
 // 📌 Generar rutas estáticas con `generateStaticParams`
 export async function generateStaticParams() {
   try {
@@ -94,6 +100,10 @@ export default async function ArticuloDetallesPage({ params }) {
     console.error("Error al obtener los datos:", error.message);
   }
 
+  const fullContent = articulo?.full_content || "Contenido no disponible.";
+  const tooManyH2 = countH2(fullContent) > 10;
+
+  
   const structuredData = articulo
     ? {
         "@context": "https://schema.org",
@@ -144,50 +154,37 @@ export default async function ArticuloDetallesPage({ params }) {
         <h1 className="text-3xl font-bold text-gray-800">{articulo?.title || "Título no disponible"}</h1>
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
         <ReactMarkdown
-  remarkPlugins={[remarkGfm]}
-  components={{
-    h1: ({ ...props }) => (
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-    ),
-    h2: ({ node, ...props }) => {
-      // 🔍 Detectar si hay demasiados H2 y reducir a H3
-      if (typeof document !== "undefined") {
-        const tooManyH2 = document.querySelectorAll("h2").length > 10;
-        return tooManyH2 ? (
-          <h3 className="text-xl font-semibold text-gray-700 mt-6" {...props} />
-        ) : (
-          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-        );
-      }
-      return <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />;
-    },
-    strong: ({ ...props }) => (
-      // ✅ Se usa 'font-medium' en lugar de 'font-bold' para reducir la sobrecarga de negritas
-      <span className="font-medium text-gray-900" {...props} /> 
-    ),
-    table: ({ ...props }) => (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300" {...props} />
-      </div>
-    ),
-    th: ({ ...props }) => (
-      <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
-    ),
-    td: ({ ...props }) => (
-      <td className="border border-gray-300 px-4 py-2" {...props} />
-    ),
-    blockquote: ({ ...props }) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
-    ),
-    ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
-    ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-    li: ({ ...props }) => <li className="mb-2" {...props} />,
-  }}
->
-  {articulo?.full_content || "Contenido no disponible."}
-</ReactMarkdown>
-
-
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h1: ({ ...props }) => (
+                <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+              ),
+              h2: ({ ...props }) =>
+                tooManyH2 ? (
+                  <h3 className="text-xl font-semibold text-gray-700 mt-6" {...props} />
+                ) : (
+                  <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+                ),
+              strong: ({ ...props }) => <span className="font-medium text-gray-900" {...props} />,
+              table: ({ ...props }) => (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300" {...props} />
+                </div>
+              ),
+              th: ({ ...props }) => (
+                <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
+              ),
+              td: ({ ...props }) => <td className="border border-gray-300 px-4 py-2" {...props} />,
+              blockquote: ({ ...props }) => (
+                <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
+              ),
+              ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+              ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+              li: ({ ...props }) => <li className="mb-2" {...props} />,
+            }}
+          >
+            {fullContent}
+          </ReactMarkdown>
         </div>
       </div>
 
