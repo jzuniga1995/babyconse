@@ -149,10 +149,20 @@ export default async function ArticuloDetallesPage({ params }) {
     h1: ({ ...props }) => (
       <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
     ),
-    h2: ({ ...props }) => (
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-    ),
+    h2: ({ node, ...props }) => {
+      // 🔍 Detectar si hay demasiados H2 y reducir a H3
+      if (typeof document !== "undefined") {
+        const tooManyH2 = document.querySelectorAll("h2").length > 10;
+        return tooManyH2 ? (
+          <h3 className="text-xl font-semibold text-gray-700 mt-6" {...props} />
+        ) : (
+          <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+        );
+      }
+      return <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />;
+    },
     strong: ({ ...props }) => (
+      // ✅ Se usa 'font-medium' en lugar de 'font-bold' para reducir la sobrecarga de negritas
       <span className="font-medium text-gray-900" {...props} /> 
     ),
     table: ({ ...props }) => (
@@ -176,6 +186,7 @@ export default async function ArticuloDetallesPage({ params }) {
 >
   {articulo?.full_content || "Contenido no disponible."}
 </ReactMarkdown>
+
 
         </div>
       </div>
