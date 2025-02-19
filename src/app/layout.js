@@ -21,12 +21,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <head>
-        {/* Favicon */}
-       {/* Favicon */}
-  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
-  <link rel="shortcut icon" href="/logo.png" />
 
-        {/* 🚨 Se eliminó el <title> global para evitar duplicados */}
+<link rel="icon" href="/favicon.ico" />
+
+<meta property="og:image" content="/saludyser-logo.png" />
+
       </head>
       <body className="bg-gray-50 font-sans">
         {!specialRoute && (
