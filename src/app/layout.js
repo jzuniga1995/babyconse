@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       <head>
         {/* Favicon */}
        {/* Favicon */}
-  <link rel="icon" type="image/png" sizes="32x32" href="/Logo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
   <link rel="shortcut icon" href="/Logo.png" />
 
         {/* 🚨 Se eliminó el <title> global para evitar duplicados */}
