@@ -125,67 +125,69 @@ export default async function ArticuloDetallesPage({ params }) {
       }
     : null;
 
-  return (
-    <section className="bg-gray-50 min-h-screen py-10 mt-16">
-      <div className="max-w-4xl mx-auto px-4">
-        <Link
-          href="/articulos"
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-700 transition-colors"
-        >
-          <FaArrowLeft />
-          Volver
-        </Link>
-      </div>
-
-      {articulo?.image && (
-        <div className="max-w-4xl mx-auto px-4 mt-6">
-          <Image
-            src={articulo.image}
-            alt={`Imagen del artículo: ${articulo.title}`}
-            width={800}
-            height={450}
-            className="rounded-lg shadow-md"
-            priority
-          />
+    return (
+      <section className="bg-gray-50 min-h-screen py-10 mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link
+            href="/articulos"
+            className="flex items-center gap-2 text-blue-500 hover:text-blue-700 transition-colors"
+          >
+            <FaArrowLeft />
+            Volver
+          </Link>
         </div>
-      )}
-
-      <div className="max-w-3xl mx-auto px-6 mt-8 bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800">{articulo?.title || "Título no disponible"}</h1>
-        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
-<ReactMarkdown
-  remarkPlugins={[remarkGfm]}
-  components={{
-    h1: ({ ...props }) => (
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-    ),
-    h2: ({ ...props }) => {
-      return tooManyH2 ? (
-        <h3 className="text-xl font-semibold text-gray-700 mt-6" {...props} />
-      ) : (
-        <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
-      );
-    },
-    strong: ({ ...props }) => <span className="font-medium text-gray-900" {...props} />,
-    table: ({ ...props }) => (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300" {...props} />
-      </div>
-    ),
-    th: ({ ...props }) => (
-      <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
-    ),
-    td: ({ ...props }) => <td className="border border-gray-300 px-4 py-2" {...props} />,
-    blockquote: ({ ...props }) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
-    ),
-    ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
-    ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-    li: ({ ...props }) => <li className="mb-2" {...props} />,
-  }}
->
-  {fullContent}
-</ReactMarkdown>
+    
+        {articulo?.image && (
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            <Image
+              src={articulo.image}
+              alt={`Imagen del artículo: ${articulo.title}`}
+              width={1200}
+              height={600}
+              className="rounded-lg shadow-md w-full object-cover"
+              priority
+            />
+          </div>
+        )}
+    
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 bg-white p-6 sm:p-8 lg:p-10 rounded-lg shadow-lg">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
+            {articulo?.title || "Título no disponible"}
+          </h1>
+          <div className="prose prose-base sm:prose-lg lg:prose-xl max-w-none text-gray-700 leading-relaxed mt-8 space-y-6">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ ...props }) => (
+                  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+                ),
+                h2: ({ ...props }) => (
+                  tooManyH2 ? (
+                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mt-6" {...props} />
+                  ) : (
+                    <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 border-b border-gray-300 pb-2 mt-8" {...props} />
+                  )
+                ),
+                strong: ({ ...props }) => <span className="font-bold text-gray-900" {...props} />,
+                table: ({ ...props }) => (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300" {...props} />
+                  </div>
+                ),
+                th: ({ ...props }) => (
+                  <th className="border border-gray-300 px-4 py-2 bg-gray-200 text-left" {...props} />
+                ),
+                td: ({ ...props }) => <td className="border border-gray-300 px-4 py-2" {...props} />,
+                blockquote: ({ ...props }) => (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4" {...props} />
+                ),
+                ul: ({ ...props }) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+                ol: ({ ...props }) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+                li: ({ ...props }) => <li className="mb-2" {...props} />,
+              }}
+            >
+              {fullContent}
+            </ReactMarkdown>
 
         </div>
       </div>
