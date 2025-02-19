@@ -39,12 +39,17 @@ export async function generateMetadata({ params }) {
       const data = await response.json();
       const articulo = data.articulo;
 
+      // 🔑 Limitar el título a 60 caracteres máximo
+      const truncatedTitle = articulo.title.length > 60
+        ? `${articulo.title.slice(0, 57)}...`
+        : articulo.title;
+
       return {
-        title: `${articulo.title} | Salud y Ser`, 
+        title: `${truncatedTitle} | Salud y Ser`, 
         description: articulo.meta_description || articulo.description || "Lee más sobre este tema en Salud y Ser.",
         keywords: articulo.meta_keywords || "salud, bienestar, nutrición",
         openGraph: {
-          title: `${articulo.title} | Información y Consejos en Salud y Ser`,
+          title: `${truncatedTitle} | Información y Consejos en Salud y Ser`,
           description: articulo.meta_description || articulo.description || "Descubre información útil.",
           type: "article",
           image: articulo.image || "/images/default.jpg",
@@ -69,11 +74,10 @@ export async function generateMetadata({ params }) {
     title: "Artículo no encontrado | Salud y Ser",
     description: "El artículo que buscas no está disponible.",
     alternates: {
-      canonical: `${baseUrl}/articulos/${slug}`,
+      canonical: `${baseUrl}/articulos/${params.slug}`,
     },
   };
 }
-
 
 // 📌 Página del artículo
 export default async function ArticuloDetallesPage({ params }) {
