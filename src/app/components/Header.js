@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import SideMenu from "./SideMenu";
+import Image from "next/image";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,16 +14,32 @@ export default function Header() {
 
   return (
     <header className="bg-gradient-to-r from-green-500 via-green-600 to-teal-600 text-white shadow-md fixed top-0 w-full z-50">
-      <div className="container mx-auto flex items-center justify-between py-4 px-6">
-        {/* Logo */}
-        <div className="flex flex-col">
-          <Link href="/" className="text-2xl md:text-3xl font-bold tracking-wide">
-            SaludySer
-          </Link>
-          <p className="text-xs md:text-sm text-green-200 mt-1">
-            Tu guía para el bienestar físico y mental
-          </p>
-        </div>
+<div className="container mx-auto flex items-center justify-between py-4 px-6">
+  {/* Logo y Nombre */}
+  <div className="flex items-center space-x-3">
+    {/* ✅ Logo optimizado */}
+    <Link href="/" className="flex items-center">
+      <Image
+        src="/Logo.png" // Reemplázalo por el archivo final
+        alt="SaludySer Logo"
+        width={90} // 🔹 Aumentar el tamaño base
+        height={90}
+        className="w-15 h-15" // 🔹 Ajuste en Tailwind para mejor visualización
+        priority
+      />
+    </Link>
+
+    {/* ✅ Texto del logo con alineación mejorada */}
+    <div className="flex flex-col">
+      <Link href="/" className="text-3xl md:text-4xl font-bold tracking-wide">
+        SaludySer
+      </Link>
+      <p className="text-sm md:text-base text-green-200 mt-1">
+        Tu guía para el bienestar físico y mental
+      </p>
+    </div>
+  </div>
+ 
 
         {/* Navegación en escritorio */}
         <nav className="hidden sm:flex items-center gap-8">
