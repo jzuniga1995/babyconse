@@ -63,22 +63,7 @@ export default function SobreNosotros() {
         </Link>
       </section>
 
-      {/* Atribución de iconos */}
-      <footer className="text-center mt-12 text-gray-500 text-sm">
-        <p>
-          Icono de manos por{" "}
-          <a
-            href="https://www.flaticon.es/iconos-gratis/impresion-de-la-mano"
-            title="impresión de la mano iconos"
-            className="text-green-600 underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Victoruler
-          </a>{" "}
-          de Flaticon.
-        </p>
-      </footer>
+
     </div>
   );
 }
