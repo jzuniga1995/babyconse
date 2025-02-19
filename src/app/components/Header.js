@@ -20,7 +20,7 @@ export default function Header() {
     {/* ✅ Logo optimizado */}
     <Link href="/" className="flex items-center">
       <Image
-        src="/Logo.png" // Reemplázalo por el archivo final
+        src="/logo.png" // Reemplázalo por el archivo final
         alt="SaludySer Logo"
         width={90} // 🔹 Aumentar el tamaño base
         height={90}
