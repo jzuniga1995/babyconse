@@ -65,7 +65,7 @@ export default function Pagination({ page, pages, onPageChange }) {
 
   return (
     <nav className="flex flex-col items-center mt-6 w-full px-4" aria-label="Paginación">
-      <div className="text-lg sm:text-xl font-bold text-gray-900 mb-3 text-center">Paginación</div>
+      <div className="text-lg sm:text-xl font-bold text-yellow-500 mb-3 text-center">SaludySer</div>
 
       <div className="flex justify-center items-center gap-2 sm:gap-3 p-2 bg-gray-100 rounded-lg shadow-md w-auto">
         <button

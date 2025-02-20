@@ -159,14 +159,18 @@ export default function Foro() {
 // Si el usuario no está autenticado, redirigir a inicio de sesión
 if (!user) {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <button
-        onClick={() => signIn("google", { callbackUrl: "/foro" })}
-        aria-label="Iniciar sesión con Google"
-        className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-transform transform hover:scale-105"
-      >
-        Iniciar Sesión
-      </button>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center px-4">
+    <p className="mb-4 text-lg text-gray-700">
+      Debes iniciar sesión para participar en el foro y unirte a la conversación.
+    </p>
+ <button
+  onClick={() => signIn("google", { callbackUrl: "/foro" })}
+  aria-label="Iniciar sesión con Google"
+  className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-full shadow-lg hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 active:scale-95"
+>
+  Iniciar Sesión
+</button>
+
     </div>
   );
 }

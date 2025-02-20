@@ -2,39 +2,58 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 
-// 📌 Ruta de imágenes a procesar
 const inputDir = path.join(__dirname, "../../public/images/articulos");
-const tempDir = path.join(__dirname, "../../public/images/temp"); // 📌 Carpeta temporal para evitar conflictos
+const tempDir = path.join(__dirname, "../../public/images/temp");
 
 // Crear la carpeta temporal si no existe
 fs.mkdirSync(tempDir, { recursive: true });
 
-// Función para procesar imágenes recursivamente
+// Función para limpiar la carpeta temporal
+const cleanTempDir = () => {
+    fs.readdirSync(tempDir).forEach((file) => {
+        const tempPath = path.join(tempDir, file);
+        fs.unlinkSync(tempPath);
+    });
+};
+
+// Función para procesar imágenes
 const processImages = (dir) => {
     fs.readdirSync(dir).forEach((file) => {
         const inputPath = path.join(dir, file);
+        const outputPath = inputPath.replace(/\.(jpg|png|webp)$/i, ".webp");
+        const tempOutputPath = path.join(tempDir, file.replace(/\.(jpg|png|webp)$/i, ".webp"));
 
         if (fs.statSync(inputPath).isDirectory()) {
-            processImages(inputPath); // 📌 Si es una carpeta, procesarla recursivamente
-        } else if (/\.(jpg|png|webp)$/i.test(file)) {  
-            const tempOutputPath = path.join(tempDir, file); // 📌 Guardar temporalmente
-            const finalOutputPath = inputPath.replace(/\.(jpg|png|webp)$/, ".webp");
+            processImages(inputPath); // Procesar subcarpetas
+        } else if (/\.(jpg|png|webp)$/i.test(file)) {
+            // Verificar si el archivo .webp ya existe
+            if (fs.existsSync(outputPath)) {
+                console.log(`⚠️  Ya optimizado: ${outputPath}`);
+                return;
+            }
 
+            // Procesar solo si no existe el archivo WebP
             sharp(inputPath)
-                .resize({ width: 800 }) // Ajustar tamaño
-                .modulate({ brightness: 1.2, saturation: 1.4 }) // **Más brillo y saturación**
-                .toFormat("webp") // Convertir a WebP
-                .toFile(tempOutputPath) // 📌 Guardar temporalmente
+                .resize({ width: 800 })
+                .modulate({ brightness: 1.2, saturation: 1.4 })
+                .toFormat("webp")
+                .toFile(tempOutputPath)
                 .then(() => {
-                    fs.renameSync(tempOutputPath, finalOutputPath); // 📌 Reemplazar el archivo original
+                    fs.renameSync(tempOutputPath, outputPath); // Reemplazar el archivo original
                     console.log(`✅ Optimizado: ${inputPath}`);
                 })
-                .catch((err) => console.error(`❌ Error en ${inputPath}:`, err));
+                .catch((err) => {
+                    console.error(`❌ Error en ${inputPath}:`, err);
+                    if (fs.existsSync(tempOutputPath)) {
+                        fs.unlinkSync(tempOutputPath); // Eliminar archivos incompletos
+                    }
+                });
         }
     });
 };
 
-// Ejecutar el procesamiento de imágenes
+// Ejecutar y limpiar la carpeta temporal después
 processImages(inputDir);
+cleanTempDir();
 
 console.log("🚀 Edición de imágenes completada.");
