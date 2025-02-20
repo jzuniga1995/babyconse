@@ -34,10 +34,11 @@ const processImages = (dir) => {
 
             // Procesar solo si no existe el archivo WebP
             sharp(inputPath)
-                .resize({ width: 800 })
-                .modulate({ brightness: 1.2, saturation: 1.4 })
-                .toFormat("webp")
-                .toFile(tempOutputPath)
+            .resize({ width: 800 })  // Redimensiona a 800px de ancho
+            .modulate({ brightness: 1.05, saturation: 1.1 })  // Filtro más natural
+            .toFormat("webp")
+            .toFile(tempOutputPath)
+        
                 .then(() => {
                     fs.renameSync(tempOutputPath, outputPath); // Reemplazar el archivo original
                     console.log(`✅ Optimizado: ${inputPath}`);
